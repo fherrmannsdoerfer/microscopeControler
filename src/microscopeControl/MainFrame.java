@@ -1,5 +1,7 @@
 package microscopeControl;
 
+import ij.ImagePlus;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -167,6 +169,11 @@ public class MainFrame extends JFrame {
 		latestImage = currImg;
 		id.updateImage(currImg);
 	}
+	
+	void setCurrentImage(ImagePlus imp) {
+		id.updateImage(imp);
+	}
+	
 	
 	WindowListener main_window_WindowListener =new WindowAdapter() {
 		@Override

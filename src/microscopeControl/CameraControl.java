@@ -39,6 +39,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JSlider;
+import javax.swing.JComboBox;
 
 public class CameraControl extends JPanel {
 	private JTextField txtGain;
@@ -54,11 +55,15 @@ public class CameraControl extends JPanel {
 	JLabel lblStatus;
 	JButton btnStartAcquisition;
 	JButton btnLoadSavePath;
+	JButton btnStartLivePreview;
 	String camName;
 	CMMCore core;
 	Thread acquisitionThread;
+	Thread livePreviewThread;
 	MainFrame parent;
-
+	boolean livePreviewRunning;
+	JComboBox comboBoxShutter;
+	
 	class TimeLoop implements Runnable {
 		public TimeLoop(){}
 		
@@ -83,15 +88,45 @@ public class CameraControl extends JPanel {
 		}
 	}
 	
+	class LivePreview implements Runnable {
+		LivePreview(){
+			livePreviewRunning = true;
+		}
+		@Override
+		public void run() {
+			Object img;
+			int exp;
+			while (livePreviewRunning) {
+				exp = Integer.parseInt(txtExposureTime.getText());
+				try {
+					core.setProperty(core.getCameraDevice(),"Exposure", exp);
+					core.snapImage();
+					img = core.getImage();
+					ImageProcessor ipr = ImageUtils.makeProcessor(core,img);
+		    	    ImagePlus imp = new ImagePlus("",ipr);
+					parent.setCurrentImage(imp);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		}
+		void endThread() {
+			livePreviewRunning = false;
+		}
+		
+	}
+	
 	class MessageLoop implements Runnable {
 		MonitorWidget mmw;
 		int exposure;
 		int nbrFrames;
 		String path;
-		public MessageLoop(int exposure_, int nbrFrames_, String path_) {
-			exposure = exposure_;
-			nbrFrames = nbrFrames_;
-			path = path_;
+		public MessageLoop(int exposure, int nbrFrames, String path) {
+			this.exposure = exposure;
+			this.nbrFrames = nbrFrames;
+			this.path = path;
 		}
 	    public void run() {
 			
@@ -112,7 +147,7 @@ public class CameraControl extends JPanel {
 		    	double now = System.currentTimeMillis();
 		    	while (core.getRemainingImageCount() > 0 || core.isSequenceRunning(core.getCameraDevice())) {
 		    	   if (core.getRemainingImageCount() > 0) {
-		    		  System.out.println("Remaining image count: "+core.getRemainingImageCount());
+		    		  //System.out.println("Remaining image count: "+core.getRemainingImageCount());
 		    		  lblCurrentFrame.setText(String.valueOf(frame+1));
 		    		  
 		    		  System.out.println(frame);
@@ -248,11 +283,19 @@ public class CameraControl extends JPanel {
 		Box horizontalBox_4 = Box.createHorizontalBox();
 		verticalBox.add(horizontalBox_4);
 		
-		Component horizontalGlue_2 = Box.createHorizontalGlue();
-		horizontalBox_4.add(horizontalGlue_2);
-		
 		chkboxFrameTransfer = new JCheckBox("Frame transfer");
 		chkboxFrameTransfer.addActionListener(chkboxFrameTransferActionListener);
+		
+		JLabel lblNewLabel_4 = new JLabel("Shutter");
+		horizontalBox_4.add(lblNewLabel_4);
+		
+		String options[] = {"open","closed"};
+	    comboBoxShutter = new JComboBox(options);
+		comboBoxShutter.addActionListener(comboBoxShutterActionListener);
+		horizontalBox_4.add(comboBoxShutter);
+		
+		Component horizontalGlue_2 = Box.createHorizontalGlue();
+		horizontalBox_4.add(horizontalGlue_2);
 		horizontalBox_4.add(chkboxFrameTransfer);
 		
 		Component verticalGlue_4 = Box.createVerticalGlue();
@@ -281,6 +324,7 @@ public class CameraControl extends JPanel {
 		verticalBox.add(horizontalBox_5);
 		
 		txtSavePath = new JTextField();
+		txtSavePath.setText("c:\\tmp2\\bla");
 		txtSavePath.setHorizontalAlignment(SwingConstants.LEFT);
 		txtSavePath.setMinimumSize(new Dimension(6, 10));
 		txtSavePath.setPreferredSize(new Dimension(6, 10));
@@ -297,6 +341,23 @@ public class CameraControl extends JPanel {
 		
 		Component verticalGlue_3 = Box.createVerticalGlue();
 		verticalBox.add(verticalGlue_3);
+		
+		Box horizontalBox_8 = Box.createHorizontalBox();
+		verticalBox.add(horizontalBox_8);
+		
+		btnStartLivePreview = new JButton("Start Live preview");
+		btnStartLivePreview.addActionListener(btnStartLivePreviewActionListener);
+		horizontalBox_8.add(btnStartLivePreview);
+		
+		Component horizontalGlue_9 = Box.createHorizontalGlue();
+		horizontalBox_8.add(horizontalGlue_9);
+		
+		JButton btnStopLivePreview = new JButton("Stop Live preview");
+		btnStopLivePreview.addActionListener(btnStopLivePreviewActionListener);
+		horizontalBox_8.add(btnStopLivePreview);
+		
+		Component verticalGlue_7 = Box.createVerticalGlue();
+		verticalBox.add(verticalGlue_7);
 		
 		Box horizontalBox = Box.createHorizontalBox();
 		verticalBox.add(horizontalBox);
@@ -408,6 +469,51 @@ public class CameraControl extends JPanel {
 			}
 			catch (Exception e2){
 				e2.printStackTrace();
+			}
+		}
+	};
+	
+	ActionListener btnStartLivePreviewActionListener =new ActionListener() {
+		public void actionPerformed(ActionEvent arg0) {
+			try {
+				livePreviewThread = new Thread(new LivePreview());
+				livePreviewThread.start();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			btnStartLivePreview.setEnabled(false);
+		}
+	};
+	
+	ActionListener btnStopLivePreviewActionListener =new ActionListener() {
+		public void actionPerformed(ActionEvent arg0) {
+			try {
+				livePreviewRunning = false;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			btnStartLivePreview.setEnabled(true);
+		}
+	};
+	ActionListener comboBoxShutterActionListener =new ActionListener() {
+		public void actionPerformed(ActionEvent arg0) {
+			if (comboBoxShutter.getSelectedItem().toString().equals("open")){
+				try {
+					core.setProperty("iXon Ultra", "Shutter (Internal)","Open");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else {
+				try {
+					core.setProperty("iXon Ultra", "Shutter (Internal)","Closed");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	};

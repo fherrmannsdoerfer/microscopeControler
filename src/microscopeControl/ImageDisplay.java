@@ -23,9 +23,13 @@ import java.io.IOException;
 
 import javax.swing.BoxLayout;
 import javax.swing.border.TitledBorder;
+import javax.swing.SwingConstants;
 
 public class ImageDisplay extends JPanel {
 	JLabel lblImageLabel;
+	ImagePlus currImagePlus;
+	JLabel lblMaxVal;
+	JLabel lblMinVal;
 	/**
 	 * Create the panel.
 	 */
@@ -53,8 +57,14 @@ public class ImageDisplay extends JPanel {
 		Component verticalGlue = Box.createVerticalGlue();
 		verticalBox.add(verticalGlue);
 		
+		Box horizontalBox_3 = Box.createHorizontalBox();
+		verticalBox.add(horizontalBox_3);
+		
+		Box verticalBox_1 = Box.createVerticalBox();
+		horizontalBox_3.add(verticalBox_1);
+		
 		Box horizontalBox_1 = Box.createHorizontalBox();
-		verticalBox.add(horizontalBox_1);
+		verticalBox_1.add(horizontalBox_1);
 		
 		Component horizontalGlue = Box.createHorizontalGlue();
 		horizontalBox_1.add(horizontalGlue);
@@ -69,10 +79,10 @@ public class ImageDisplay extends JPanel {
 		horizontalBox_1.add(horizontalGlue_2);
 		
 		Component verticalGlue_1 = Box.createVerticalGlue();
-		verticalBox.add(verticalGlue_1);
+		verticalBox_1.add(verticalGlue_1);
 		
 		Box horizontalBox_2 = Box.createHorizontalBox();
-		verticalBox.add(horizontalBox_2);
+		verticalBox_1.add(horizontalBox_2);
 		
 		Component horizontalGlue_1 = Box.createHorizontalGlue();
 		horizontalBox_2.add(horizontalGlue_1);
@@ -85,28 +95,77 @@ public class ImageDisplay extends JPanel {
 		
 		Component horizontalGlue_3 = Box.createHorizontalGlue();
 		horizontalBox_2.add(horizontalGlue_3);
+		
+		Box verticalBox_2 = Box.createVerticalBox();
+		horizontalBox_3.add(verticalBox_2);
+		
+		Box horizontalBox_4 = Box.createHorizontalBox();
+		verticalBox_2.add(horizontalBox_4);
+		
+		JLabel lblNewLabel = new JLabel("min val:");
+		horizontalBox_4.add(lblNewLabel);
+		
+		Component horizontalGlue_4 = Box.createHorizontalGlue();
+		horizontalBox_4.add(horizontalGlue_4);
+		
+		lblMinVal = new JLabel("0");
+		lblMinVal.setPreferredSize(new Dimension(40, 16));
+		lblMinVal.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblMinVal.setAlignmentY(Component.TOP_ALIGNMENT);
+		horizontalBox_4.add(lblMinVal);
+		
+		Box horizontalBox_5 = Box.createHorizontalBox();
+		verticalBox_2.add(horizontalBox_5);
+		
+		JLabel lblNewLabel_5 = new JLabel("max val:");
+		horizontalBox_5.add(lblNewLabel_5);
+		
+		Component horizontalGlue_5 = Box.createHorizontalGlue();
+		horizontalBox_5.add(horizontalGlue_5);
+		
+		lblMaxVal = new JLabel("0");
+		lblMaxVal.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblMaxVal.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		lblMaxVal.setPreferredSize(new Dimension(40, 16));
+		horizontalBox_5.add(lblMaxVal);
 
 	}
 	
 	void updateImage(String path){
 		//System.out.println(path);
 		ImagePlus imp = IJ.openImage(path); 
+		currImagePlus = imp;
         //ImageCanvas ic = new ImageCanvas(imp); 
         //imp.getBufferedImage();
         currImage = new ImageIcon(imp.getBufferedImage());
-
-		
-		System.out.println(currImage.getIconHeight()+" "+ currImage.getIconWidth());
+		//System.out.println(currImage.getIconHeight()+" "+ currImage.getIconWidth());
 		if (currImage != null && lblImageLabel != null) {
-			System.out.println("kein nullpointer");
+			//System.out.println("kein nullpointer");
 			lblImageLabel.setIcon(currImage);
 			//this.repaint();
 		}
 		else {
 			System.out.println("nullpointer");
 		}
+		setValues();
+	}
+	
+	void updateImage(ImagePlus imp){
+		currImagePlus = imp;
+        currImage = new ImageIcon(imp.getBufferedImage());
+		if (currImage != null && lblImageLabel != null) {
+			lblImageLabel.setIcon(currImage);
+		}
+		else {
+			System.out.println("nullpointer");
+		}
+		setValues();
 		
 	}
 	
+	void setValues(){
+		lblMinVal.setText(String.valueOf(currImagePlus.getDisplayRangeMin()));
+		lblMaxVal.setText(String.valueOf(currImagePlus.getDisplayRangeMax()));
+	};
 
 }

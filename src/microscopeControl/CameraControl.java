@@ -95,11 +95,25 @@ public class CameraControl extends JPanel {
 		@Override
 		public void run() {
 			Object img;
-			int exp;
+			double exp;
+			int gain;
+			boolean changeParams = true;
+			exp = Double.parseDouble(txtExposureTime.getText());
+			gain = Integer.parseInt(txtEmGain.getText());
 			while (livePreviewRunning) {
-				exp = Integer.parseInt(txtExposureTime.getText());
+				if (!(exp==Double.parseDouble(txtExposureTime.getText())) | !(gain == Integer.parseInt(txtEmGain.getText()))) {
+					exp = Double.parseDouble(txtExposureTime.getText());
+					gain = Integer.parseInt(txtEmGain.getText());
+					changeParams = true;
+				}
+				else {changeParams = false;}
+				
 				try {
-					core.setProperty(core.getCameraDevice(),"Exposure", exp);
+					if (changeParams) {
+						core.setProperty(core.getCameraDevice(),"Exposure", exp);
+						core.setProperty(core.getCameraDevice(),"Gain", gain);
+					}
+					
 					core.snapImage();
 					img = core.getImage();
 					ImageProcessor ipr = ImageUtils.makeProcessor(core,img);
@@ -120,15 +134,15 @@ public class CameraControl extends JPanel {
 	
 	class MessageLoop implements Runnable {
 		MonitorWidget mmw;
-		int exposure;
+		double exposure;
 		int nbrFrames;
 		String path;
-		public MessageLoop(int exposure, int nbrFrames, String path) {
+		public MessageLoop(double exposure, int nbrFrames, String path) {
 			this.exposure = exposure;
 			this.nbrFrames = nbrFrames;
 			this.path = path;
 		}
-	    public void run() {
+		public void run() {
 			
 	    	Object img;
 	    	try {
@@ -417,13 +431,15 @@ public class CameraControl extends JPanel {
 				e.printStackTrace();
 			}
 			try {
+				System.out.println(txtEmGain.getText());
+				System.out.println(Integer.parseInt(txtEmGain.getText()));
 				core.setProperty(camName,"Gain",Integer.parseInt(txtEmGain.getText()));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
-			int exp = Integer.parseInt(txtExposureTime.getText());
+			double exp = Double.parseDouble(txtExposureTime.getText());
 			int nbr = Integer.parseInt(txtNumberFrames.getText());
 			String path = txtSavePath.getText();
 			acquisitionThread = new Thread(new MessageLoop(exp,nbr,path));
@@ -501,7 +517,9 @@ public class CameraControl extends JPanel {
 		public void actionPerformed(ActionEvent arg0) {
 			if (comboBoxShutter.getSelectedItem().toString().equals("open")){
 				try {
-					core.setProperty("iXon Ultra", "Shutter (Internal)","Open");
+					livePreviewRunning = false;
+					btnStartLivePreview.setEnabled(true);
+					core.setProperty("iXon Ultra", "Shutter (Internal)","Open");	
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -509,6 +527,8 @@ public class CameraControl extends JPanel {
 			}
 			else {
 				try {
+					livePreviewRunning = false;
+					btnStartLivePreview.setEnabled(true);
 					core.setProperty("iXon Ultra", "Shutter (Internal)","Closed");
 				} catch (Exception e) {
 					// TODO Auto-generated catch block

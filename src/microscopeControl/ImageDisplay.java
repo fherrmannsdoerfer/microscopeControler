@@ -109,7 +109,7 @@ public class ImageDisplay extends JPanel {
 		horizontalBox_4.add(horizontalGlue_4);
 		
 		lblMinVal = new JLabel("0");
-		lblMinVal.setPreferredSize(new Dimension(40, 16));
+		lblMinVal.setPreferredSize(new Dimension(60, 16));
 		lblMinVal.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblMinVal.setAlignmentY(Component.TOP_ALIGNMENT);
 		horizontalBox_4.add(lblMinVal);
@@ -126,7 +126,7 @@ public class ImageDisplay extends JPanel {
 		lblMaxVal = new JLabel("0");
 		lblMaxVal.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblMaxVal.setAlignmentX(Component.RIGHT_ALIGNMENT);
-		lblMaxVal.setPreferredSize(new Dimension(40, 16));
+		lblMaxVal.setPreferredSize(new Dimension(60, 16));
 		horizontalBox_5.add(lblMaxVal);
 
 	}

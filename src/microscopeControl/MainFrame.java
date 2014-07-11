@@ -40,10 +40,15 @@ public class MainFrame extends JFrame {
 	//static ij.ImagePlus ip;
 	private JPanel contentPane;
 	static ImageDisplay id;
+	final CameraControl cc;
 	private CMMCore core;
 	private MMStudioMainFrame gui;
 	private AcquisitionEngine acq;
 	static String latestImage;
+	private PifocControllWidget pcw;
+	JLabel lblCameraStatus;
+	JLabel lblAction;
+	JLabel lblFrameCount;
 	/**
 	 * Launch the application.
 	 */
@@ -109,18 +114,29 @@ public class MainFrame extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(new GridLayout(0, 1, 0, 0));
 		
+		Box verticalBox_2 = Box.createVerticalBox();
+		contentPane.add(verticalBox_2);
+		
 		Box horizontalBox_3 = Box.createHorizontalBox();
-		contentPane.add(horizontalBox_3);
+		verticalBox_2.add(horizontalBox_3);
 		
 		Box verticalBox_1 = Box.createVerticalBox();
+		verticalBox_1.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		horizontalBox_3.add(verticalBox_1);
 		
 		id = new ImageDisplay();
+		id.setPreferredSize(new Dimension(640, 640));
+		id.setMaximumSize(new Dimension(700, 700));
 		//final ImageDisplay id = new ImageDisplay();
 		id.setAlignmentX(Component.LEFT_ALIGNMENT);
 		id.setAlignmentY(Component.TOP_ALIGNMENT);
 		verticalBox_1.add(id);
 		//id.updateImage("file:///C://Users//herrmannsdoerfer//Desktop//Series017_z000.tif");
+		
+		pcw = new PifocControllWidget(this, core_);
+		pcw.setAlignmentX(Component.LEFT_ALIGNMENT);
+		verticalBox_1.add(pcw);
+		
 		
 		Component verticalGlue = Box.createVerticalGlue();
 		verticalBox_1.add(verticalGlue);
@@ -142,13 +158,40 @@ public class MainFrame extends JFrame {
 		horizontalBox_1.add(lp);
 		final LaserPanel lp2 = new LaserPanel(core, "CoherentCube405","405 nm");
 		horizontalBox_1.add(lp2);
-		final CameraControl cc = new CameraControl(this, core, acq,"iXon Ultra");
+		cc = new CameraControl(this, core, acq,"iXon Ultra");
 		verticalBox.add(cc);
 		
-		final MonitorWidget mw = new MonitorWidget();
+		final MonitorWidget mw = new MonitorWidget(core);
 		mw.setPreferredSize(new Dimension(300, 60));
 		verticalBox.add(mw);
 		mw.setMinimumSize(new Dimension(0, 0));
+		
+		Box horizontalBox_4 = Box.createHorizontalBox();
+		verticalBox_2.add(horizontalBox_4);
+		
+		JLabel lblNewLabel = new JLabel("Status Camera");
+		horizontalBox_4.add(lblNewLabel);
+		
+		Component horizontalGlue = Box.createHorizontalGlue();
+		horizontalBox_4.add(horizontalGlue);
+		
+		lblCameraStatus = new JLabel("New label");
+		horizontalBox_4.add(lblCameraStatus);
+		
+		Component horizontalGlue_2 = Box.createHorizontalGlue();
+		horizontalBox_4.add(horizontalGlue_2);
+		
+		Component horizontalGlue_1 = Box.createHorizontalGlue();
+		horizontalBox_4.add(horizontalGlue_1);
+		
+		lblAction = new JLabel("");
+		horizontalBox_4.add(lblAction);
+		
+		Component horizontalGlue_3 = Box.createHorizontalGlue();
+		horizontalBox_4.add(horizontalGlue_3);
+		
+		lblFrameCount = new JLabel("New label");
+		horizontalBox_4.add(lblFrameCount);
 		
 		//Thread t = new Thread(new MessageLoop(mw));
         //t.start();
@@ -170,10 +213,33 @@ public class MainFrame extends JFrame {
 		id.updateImage(currImg);
 	}
 	
+	String getCurrentOutputFolder(){
+		return cc.getCurrentOutputFolder();
+	}
+	
+	double getExposureTime(){
+		return cc.getExposureTime();
+	}
+	
+	int getGain(){
+		return cc.getGain();
+	}
+	
 	void setCurrentImage(ImagePlus imp) {
 		id.updateImage(imp);
 	}
 	
+	void setCameraStatus(String input) {
+		lblCameraStatus.setText(input);
+	}
+	
+	void setFrameCount(String input) {
+		lblFrameCount.setText(input);
+	}
+	
+	void setAction(String input) {
+		lblAction.setText(input);
+	}
 	
 	WindowListener main_window_WindowListener =new WindowAdapter() {
 		@Override

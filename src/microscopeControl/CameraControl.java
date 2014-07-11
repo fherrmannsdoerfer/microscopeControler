@@ -37,6 +37,10 @@ import java.awt.GridLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.swing.JSlider;
 import javax.swing.JComboBox;
@@ -47,6 +51,7 @@ public class CameraControl extends JPanel {
 	private JTextField txtExposureTime;
 	private JTextField txtSavePath;
 	private JTextField txtNumberFrames;
+	private JTextField txtMeasurementTag;
 	JLabel lblCurrTemp;
 	JTextField txtSetTemp;
 	JCheckBox chkboxFrameTransfer;
@@ -56,6 +61,7 @@ public class CameraControl extends JPanel {
 	JButton btnStartAcquisition;
 	JButton btnLoadSavePath;
 	JButton btnStartLivePreview;
+	JButton btnCaptureWidefieldImage;
 	String camName;
 	CMMCore core;
 	Thread acquisitionThread;
@@ -76,8 +82,9 @@ public class CameraControl extends JPanel {
 					
 					if (Integer.parseInt(core.getProperty(camName, "CCDTemperature"))-Integer.parseInt(currTemp) != 0){
 						lblStatus.setText("Cooling");
+						parent.setCameraStatus("Cooling");
 					}
-					else {lblStatus.setText("Stand by");}
+					else {lblStatus.setText("Stand by");parent.setCameraStatus("Stand by");}
 					Thread.sleep(1000);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -113,7 +120,8 @@ public class CameraControl extends JPanel {
 						core.setProperty(core.getCameraDevice(),"Exposure", exp);
 						core.setProperty(core.getCameraDevice(),"Gain", gain);
 					}
-					
+					//System.out.println("Gain: "+core.getProperty(core.getCameraDevice(), "Gain"));
+					//System.out.println("Exposure: "+core.getProperty(core.getCameraDevice(), "Exposure"));
 					core.snapImage();
 					img = core.getImage();
 					ImageProcessor ipr = ImageUtils.makeProcessor(core,img);
@@ -132,46 +140,80 @@ public class CameraControl extends JPanel {
 		
 	}
 	
+	class LivePreviewWithoutCamera implements Runnable {
+		LivePreviewWithoutCamera(){
+			livePreviewRunning = true;
+		}
+		@Override
+		public void run() {
+			Object img;
+			double exp;
+			int gain;
+			
+				try {
+		    	    ImagePlus imp = new ImagePlus("C:\\Users\\herrmannsdoerfer\\Documents\\Projects\\LaborTagebuch\\Dateien\\2014_06\\halbSchwarz.tif");
+					parent.setCurrentImage(imp);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					System.out.println("Fehler beim einladen des Bildes!!!");
+				}
+				
+			}
+		
+		void endThread() {
+			livePreviewRunning = false;
+		}
+		
+	}
+	
 	class MessageLoop implements Runnable {
 		MonitorWidget mmw;
 		double exposure;
 		int nbrFrames;
+		int gain;
 		String path;
-		public MessageLoop(double exposure, int nbrFrames, String path) {
+		String measurementTag;
+		public MessageLoop(double exposure, int nbrFrames, int gain, String path, String measurementTag) {
 			this.exposure = exposure;
 			this.nbrFrames = nbrFrames;
+			this.gain = gain;
 			this.path = path;
+			this.measurementTag = measurementTag;
 		}
 		public void run() {
 			
 	    	Object img;
 	    	try {
+	    		boolean success = (new File(path+"\\"+measurementTag)).mkdirs();
 				core.setCircularBufferMemoryFootprint(2000);
 				//core.prepareSequenceAcquisition(core.getCameraDevice());
-				System.out.println("prepared");
-		    	System.out.println(exposure);
+				//System.out.println("prepared");
+		    	//System.out.println(exposure);
 		    	core.setProperty(core.getCameraDevice(),"Exposure", exposure);
 		    	core.startSequenceAcquisition(nbrFrames, exposure, false);
 		    	int frame = 0;
-		    	System.out.println(frame);
+		    	//System.out.println(frame);
 		    	ImageProcessor ipr;
 		    	String fname;
 		    	lblStatus.setText("Acquisition");
+		    	parent.setAction("Acquisition");
 	    		lblTotalFrames.setText(" / "+String.valueOf(nbrFrames));
+	    		createLogFile(measurementTag, gain, exposure, path, nbrFrames);
 		    	double now = System.currentTimeMillis();
 		    	while (core.getRemainingImageCount() > 0 || core.isSequenceRunning(core.getCameraDevice())) {
 		    	   if (core.getRemainingImageCount() > 0) {
 		    		  //System.out.println("Remaining image count: "+core.getRemainingImageCount());
 		    		  lblCurrentFrame.setText(String.valueOf(frame+1));
-		    		  
-		    		  System.out.println(frame);
+		    		  parent.setFrameCount(String.valueOf(frame+1)+" / "+String.valueOf(nbrFrames));
+		    		  //System.out.println(frame);
 		    	      img = core.popNextImage();
 		    	      ipr = ImageUtils.makeProcessor(core,img);
 		    	      ImagePlus imp = new ImagePlus("",ipr);
 		    	      FileSaver fs = new FileSaver(imp);
-		    	      fname = "\\img_"+String.format("%05d", frame)+".tiff";
-		    	      fs.saveAsTiff(path+fname);
-		    	      parent.setCurrentImage(path+fname);
+		    	      fname = "\\img_"+measurementTag+String.format("_%05d", frame)+".tiff";
+		    	      fs.saveAsTiff(path+"\\"+measurementTag+fname);
+		    	      parent.setCurrentImage(path+"\\"+measurementTag+fname);
 		    		  frame++;
 		    	   }
 		    	}
@@ -193,7 +235,7 @@ public class CameraControl extends JPanel {
 		camName = camName_;
 		parent = parent_;
 		setMinimumSize(new Dimension(260, 200));
-		setPreferredSize(new Dimension(300, 300));
+		setPreferredSize(new Dimension(300, 326));
 		setMaximumSize(new Dimension(400, 300));
 		setBorder(new TitledBorder(null, "Camera Control", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		setLayout(new BorderLayout(0, 0));
@@ -338,7 +380,7 @@ public class CameraControl extends JPanel {
 		verticalBox.add(horizontalBox_5);
 		
 		txtSavePath = new JTextField();
-		txtSavePath.setText("c:\\tmp2\\bla");
+		txtSavePath.setText("c:\\tmp2");
 		txtSavePath.setHorizontalAlignment(SwingConstants.LEFT);
 		txtSavePath.setMinimumSize(new Dimension(6, 10));
 		txtSavePath.setPreferredSize(new Dimension(6, 10));
@@ -355,6 +397,26 @@ public class CameraControl extends JPanel {
 		
 		Component verticalGlue_3 = Box.createVerticalGlue();
 		verticalBox.add(verticalGlue_3);
+		
+		Box horizontalBox_10 = Box.createHorizontalBox();
+		verticalBox.add(horizontalBox_10);
+		
+		JLabel lblNewLabel_5 = new JLabel("Measurement tag");
+		horizontalBox_10.add(lblNewLabel_5);
+		
+		Component horizontalGlue_10 = Box.createHorizontalGlue();
+		horizontalBox_10.add(horizontalGlue_10);
+		
+		txtMeasurementTag = new JTextField();
+		txtMeasurementTag.setText("test");
+		txtMeasurementTag.setMaximumSize(new Dimension(200, 50));
+		txtMeasurementTag.setColumns(40);
+		txtMeasurementTag.setMinimumSize(new Dimension(6, 10));
+		txtMeasurementTag.setPreferredSize(new Dimension(6, 25));
+		horizontalBox_10.add(txtMeasurementTag);
+		
+		Component verticalGlue_8 = Box.createVerticalGlue();
+		verticalBox.add(verticalGlue_8);
 		
 		Box horizontalBox_8 = Box.createHorizontalBox();
 		verticalBox.add(horizontalBox_8);
@@ -387,6 +449,11 @@ public class CameraControl extends JPanel {
 		btnAbortAcquisition.addActionListener(btnAbortAcquisitionActionListener);
 		horizontalBox.add(btnAbortAcquisition);
 		
+		JButton btnCaptureWidefieldImage = new JButton("Capture Widefield Image");
+		btnCaptureWidefieldImage.addActionListener(btnCaptureWidefieldImageActionListener);
+		btnCaptureWidefieldImage.setAlignmentX(Component.CENTER_ALIGNMENT);
+		verticalBox.add(btnCaptureWidefieldImage);
+		
 		Box horizontalBox_7 = Box.createHorizontalBox();
 		verticalBox.add(horizontalBox_7);
 		
@@ -408,7 +475,7 @@ public class CameraControl extends JPanel {
 	}
 	ActionListener btnLoadSavePathActionListener =new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
-			System.out.println("hisafs;djf;sadfj;");
+			//System.out.println("hisafs;djf;sadfj;");
 			JFileChooser fc = new JFileChooser();
 			fc.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 			int retVal = fc.showOpenDialog(btnLoadSavePath);
@@ -419,6 +486,7 @@ public class CameraControl extends JPanel {
 	};
 	ActionListener btnStartAcquisitionActionListener =new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
+			livePreviewRunning = false;
 			try {
 				if (chkboxFrameTransfer.isSelected()) {
 					core.setProperty(camName, "FrameTransfer", "On");
@@ -431,8 +499,8 @@ public class CameraControl extends JPanel {
 				e.printStackTrace();
 			}
 			try {
-				System.out.println(txtEmGain.getText());
-				System.out.println(Integer.parseInt(txtEmGain.getText()));
+				//System.out.println(txtEmGain.getText());
+				//System.out.println(Integer.parseInt(txtEmGain.getText()));
 				core.setProperty(camName,"Gain",Integer.parseInt(txtEmGain.getText()));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -441,8 +509,10 @@ public class CameraControl extends JPanel {
 			
 			double exp = Double.parseDouble(txtExposureTime.getText());
 			int nbr = Integer.parseInt(txtNumberFrames.getText());
+			int gain = Integer.parseInt(txtEmGain.getText());
 			String path = txtSavePath.getText();
-			acquisitionThread = new Thread(new MessageLoop(exp,nbr,path));
+			String measurementTag = txtMeasurementTag.getText();
+			acquisitionThread = new Thread(new MessageLoop(exp,nbr,gain,path,measurementTag));
 			acquisitionThread.start();
 			btnStartAcquisition.setEnabled(false);
 		}
@@ -493,6 +563,7 @@ public class CameraControl extends JPanel {
 		public void actionPerformed(ActionEvent arg0) {
 			try {
 				livePreviewThread = new Thread(new LivePreview());
+				//livePreviewThread = new Thread(new LivePreviewWithoutCamera());
 				livePreviewThread.start();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -537,4 +608,61 @@ public class CameraControl extends JPanel {
 			}
 		}
 	};
+	ActionListener btnCaptureWidefieldImageActionListener = new ActionListener(){
+		public void actionPerformed(ActionEvent arg0) {
+			try {
+				Object img;
+				double exp = Double.parseDouble(txtExposureTime.getText());
+				int gain = Integer.parseInt(txtEmGain.getText());
+				core.setProperty(core.getCameraDevice(),"Exposure", exp);
+				core.setProperty(core.getCameraDevice(),"Gain", gain);
+				
+				//System.out.println("Gain: "+core.getProperty(core.getCameraDevice(), "Gain"));
+				//System.out.println("Exposure: "+core.getProperty(core.getCameraDevice(), "Exposure"));
+				core.snapImage();
+				img = core.getImage();
+				ImageProcessor ipr = ImageUtils.makeProcessor(core,img);
+	    	    ImagePlus imp = new ImagePlus("",ipr);
+	    	    FileSaver fs = new FileSaver(imp);
+	    	    String measurementTag = txtMeasurementTag.getText();
+	    	    String path = txtSavePath.getText();
+	    	    boolean success = (new File(path+"\\"+measurementTag)).mkdirs();
+	    	    String fname = "\\widefieldimg_"+measurementTag+".tiff";
+	    	    fs.saveAsTiff(path+"\\"+measurementTag+fname);
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	};
+	
+	void createLogFile(String measurementTag, int gain, double exposure, String path, int nbrFrames) {
+		try {
+			String fname = "\\log_"+measurementTag+".txt";
+			PrintWriter outputStream = new PrintWriter(new FileWriter(path+"\\"+measurementTag+fname));
+			outputStream.println("Automatically generated log file for measurement"+measurementTag);
+			outputStream.println("Gain: "+String.valueOf(gain));
+			outputStream.println("Exposure time: "+String.valueOf(exposure));
+			outputStream.println("Number Frames: "+ String.valueOf(nbrFrames));
+			outputStream.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	};
+	
+	String getCurrentOutputFolder(){
+		String measurementTag = txtMeasurementTag.getText();
+	    String path = txtSavePath.getText();
+		return path+"\\"+measurementTag;
+	}
+	int getGain(){
+		return Integer.parseInt(txtEmGain.getText());
+	}
+	
+	double getExposureTime(){
+		return Double.parseDouble(txtExposureTime.getText());
+	}
+	
 }

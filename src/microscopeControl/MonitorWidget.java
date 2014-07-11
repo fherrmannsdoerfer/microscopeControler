@@ -18,7 +18,12 @@ import java.util.Collections;
 import java.util.Vector;
 import java.awt.Dimension;
 import java.awt.ComponentOrientation;
+
 import javax.swing.border.TitledBorder;
+
+import org.micromanager.api.AcquisitionEngine;
+
+import mmcorej.CMMCore;
 
 public class MonitorWidget extends JPanel {
 	DrawPanel panel;
@@ -37,12 +42,37 @@ public class MonitorWidget extends JPanel {
 	JLabel lblXHigh;
 	JLabel lblXMed;
 	JLabel lblXLow;
-	int roundToYAxis = 10;
-	int timeIntervalX = 20;
+	double roundToYAxis = 0.1;
+	int timeIntervalX = 1;
+	int counter = 0;
+	CMMCore core;
 	/**
 	 * Create the panel.
 	 */
-	public MonitorWidget() {
+	
+	class UpdateZPosition implements Runnable {
+		public UpdateZPosition(){}
+		
+		public void run(){
+
+			while (1==1) {
+				try {
+					counter = counter + 1;
+					String currZ = core.getProperty("PIZStage", "Position");
+					addPoint(Double.valueOf(currZ));
+					panel.repaint();
+					Thread.sleep(1000);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		}
+	}
+	
+	public MonitorWidget(final CMMCore core) {
+		this.core = core;
 		setBorder(new TitledBorder(null, "Z Monitor", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 356, 0};
@@ -96,6 +126,9 @@ public class MonitorWidget extends JPanel {
 		horizontalBox.add(horizontalGlue_1);		
 		lblXHigh = new JLabel("0");
 		horizontalBox.add(lblXHigh);
+		
+		Thread UpdateZPositionThread = new Thread(new UpdateZPosition());
+		UpdateZPositionThread.start();
 	
 	}
 	
@@ -105,8 +138,8 @@ public class MonitorWidget extends JPanel {
 	}
 	
 	void updateParameters() {
-		width = this.getWidth(); // get current dimensions 
-		height = this.getHeight();
+		width = panel.getWidth(); // get current dimensions 
+		height = panel.getHeight();
 		
 		nbrVisiblePoints = width / distBetweenPoints; // calculate number of visible points based on current dimensions
 		nbrPoints = listPoints.size();
@@ -126,9 +159,12 @@ public class MonitorWidget extends JPanel {
 				maxValue = Collections.max(listPoints);
 				xMin = 0;
 			}
-			slope = (height) / (maxValue - minValue);  //slope to map data range on display range
-			minValue = (((int)Math.ceil(minValue) / roundToYAxis) - 1) * roundToYAxis; //extend the limits to have less change in the labels
-			maxValue = (((int)Math.floor(maxValue) / roundToYAxis) + 1) * roundToYAxis;
+			//System.out.println("VORHER minValue: "+minValue+ " maxValue:"+maxValue+" height: "+height);
+			//System.out.println("slope: "+slope);
+			//minValue = (((int)Math.ceil(minValue / roundToYAxis)) ) * roundToYAxis; //extend the limits to have less change in the labels
+			//maxValue = (((int)Math.floor(maxValue / roundToYAxis)) ) * roundToYAxis;
+			slope = (double)(height / (maxValue - minValue));  //slope to map data range on display range
+			//System.out.println("minValue: "+minValue+ " maxValue:"+maxValue);
 			setAxisTexts(xMin, xMax);
 			panel.setValues(distBetweenPoints, height, nbrPoints, nbrVisiblePoints, //copies calculated values into the member variables of the DrawPanel to display the graph
 							slope, width, maxValue, minValue, listPoints);
@@ -137,9 +173,9 @@ public class MonitorWidget extends JPanel {
 	}
 	
 	void setAxisTexts(int xMin, int xMax) {
-		String lblLow = String.format("%3.2f", minValue);
-		String lblMed = String.format("%3.2f", (maxValue + minValue)/2);
-		String lblHigh = String.format("%3.2f", maxValue);
+		String lblLow = String.format("%3.4f", minValue);
+		String lblMed = String.format("%3.4f", (maxValue + minValue)/2);
+		String lblHigh = String.format("%3.4f", maxValue);
 		lblYLow.setText(lblLow);
 		lblYMed.setText(lblMed);
 		lblYHigh.setText(lblHigh);
@@ -186,6 +222,8 @@ class DrawPanel extends JPanel
 				yn = height - (int)Math.ceil((listPoints.get(i)-minValue) * slope);
 				ynPlus1 = height - (int)Math.ceil((listPoints.get(i+1)-minValue) * slope);
 				g.drawLine(xn,yn,xnPlus1,ynPlus1);
+				//System.out.println(xn+" "+yn+" "+xnPlus1+" "+ynPlus1);
+				//System.out.println("height"+height+"listPoints.get(i): "+listPoints.get(i)+"minValue: +minValue"+ " slope:"+slope);
 			}
 		}
 		

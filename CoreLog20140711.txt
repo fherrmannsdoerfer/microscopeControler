@@ -1,0 +1,236 @@
+2014-07-11T13:14:52.232124 p:4744 t:3088 [LOG] -------->>
+2014-07-11T13:14:52.233124 p:4744 t:3088 [LOG] Core session started by herrmannsdoerfer on AN12589
+2014-07-11T13:14:52.233124 p:4744 t:3088 [LOG] Debug logging disabled
+2014-07-11T13:14:52.233124 p:4744 t:3088 [LOG] Debug logging disabled
+2014-07-11T13:14:52.233124 p:4744 t:3088 [LOG] > MM Studio version: 1.4.17
+2014-07-11T13:14:52.233124 p:4744 t:3088 [LOG] > MMCore version 2.3.2
+2014-07-11T13:14:52.233124 p:4744 t:3088 [LOG] > Device API version 57, Module API version 8
+2014-07-11T13:14:52.233124 p:4744 t:3088 [LOG] > Operating System: Windows 7 (amd64) 6.1
+2014-07-11T13:14:52.233124 p:4744 t:3088 [LOG] > JVM: Java HotSpot(TM) 64-Bit Server VM, version 1.6.0_25, 64-bit
+2014-07-11T13:14:53.950124 p:4744 t:3088 [LOG] System state cache updated.
+2014-07-11T13:14:53.952124 p:4744 t:3088 [LOG] > Startup script file (C:\Program Files\Micro-Manager-1.4\mmplugins\MicroscopeControl\src\org\micromanager\MicroscopeControl\MMStartup.bsh) not present.
+2014-07-11T13:15:09.561124 p:4744 t:3088 [LOG] > Error: No camera configured
+2014-07-11T13:16:03.634124 p:4092 t:612 [LOG] -------->>
+2014-07-11T13:16:03.635124 p:4092 t:612 [LOG] Core session started by herrmannsdoerfer on AN12589
+2014-07-11T13:16:03.635124 p:4092 t:612 [LOG] Debug logging disabled
+2014-07-11T13:16:03.635124 p:4092 t:612 [LOG] Debug logging disabled
+2014-07-11T13:16:03.635124 p:4092 t:612 [LOG] > MM Studio version: 1.4.17
+2014-07-11T13:16:03.635124 p:4092 t:612 [LOG] > MMCore version 2.3.2
+2014-07-11T13:16:03.635124 p:4092 t:612 [LOG] > Device API version 57, Module API version 8
+2014-07-11T13:16:03.635124 p:4092 t:612 [LOG] > Operating System: Windows 7 (amd64) 6.1
+2014-07-11T13:16:03.635124 p:4092 t:612 [LOG] > JVM: Java HotSpot(TM) 64-Bit Server VM, version 1.6.0_25, 64-bit
+2014-07-11T13:16:04.650124 p:4092 t:612 [LOG] System state cache updated.
+2014-07-11T13:16:04.652124 p:4092 t:612 [LOG] > Startup script file (C:\Program Files\Micro-Manager-1.4\mmplugins\MicroscopeControl\src\org\micromanager\MicroscopeControl\MMStartup.bsh) not present.
+2014-07-11T13:16:40.134124 p:4092 t:612 [LOG] System state cache updated.
+2014-07-11T13:16:40.135124 p:4092 t:612 [LOG] System state cache updated.
+2014-07-11T13:17:30.879160 p:3864 t:3340 [LOG] -------->>
+2014-07-11T13:17:30.880160 p:3864 t:3340 [LOG] Core session started by herrmannsdoerfer on AN12589
+2014-07-11T13:17:30.880160 p:3864 t:3340 [LOG] Debug logging disabled
+2014-07-11T13:17:30.880160 p:3864 t:3340 [LOG] Debug logging disabled
+2014-07-11T13:17:30.880160 p:3864 t:3340 [LOG] > MM Studio version: 1.4.17
+2014-07-11T13:17:30.880160 p:3864 t:3340 [LOG] > MMCore version 2.3.2
+2014-07-11T13:17:30.880160 p:3864 t:3340 [LOG] > Device API version 57, Module API version 8
+2014-07-11T13:17:30.880160 p:3864 t:3340 [LOG] > Operating System: Windows 7 (amd64) 6.1
+2014-07-11T13:17:30.880160 p:3864 t:3340 [LOG] > JVM: Java HotSpot(TM) 64-Bit Server VM, version 1.7.0, 64-bit
+2014-07-11T13:17:31.278200 p:1424 t:3080 [LOG] -------->>
+2014-07-11T13:17:31.278200 p:1424 t:3080 [LOG] Core session started by herrmannsdoerfer on AN12589
+2014-07-11T13:17:31.278200 p:1424 t:3080 [LOG] Debug logging disabled
+2014-07-11T13:17:31.278200 p:1424 t:3080 [LOG] Debug logging disabled
+2014-07-11T13:17:31.278200 p:1424 t:3080 [LOG] > MM Studio version: 1.4.17
+2014-07-11T13:17:31.278200 p:1424 t:3080 [LOG] > MMCore version 2.3.2
+2014-07-11T13:17:31.278200 p:1424 t:3080 [LOG] > Device API version 57, Module API version 8
+2014-07-11T13:17:31.278200 p:1424 t:3080 [LOG] > Operating System: Windows 7 (amd64) 6.1
+2014-07-11T13:17:31.278200 p:1424 t:3080 [LOG] > JVM: Java HotSpot(TM) 64-Bit Server VM, version 1.7.0, 64-bit
+2014-07-11T13:17:32.787351 p:1424 t:3080 [LOG] System state cache updated.
+2014-07-11T13:17:32.791352 p:1424 t:3080 [LOG] > Startup script file (C:\Program Files\Micro-Manager-1.4\mmplugins\MicroscopeControl\src\org\micromanager\MicroscopeControl\MMStartup.bsh) not present.
+2014-07-11T13:18:53.343406 p:4148 t:4160 [LOG] -------->>
+2014-07-11T13:18:53.344406 p:4148 t:4160 [LOG] Core session started by herrmannsdoerfer on AN12589
+2014-07-11T13:18:53.344406 p:4148 t:4160 [LOG] Debug logging disabled
+2014-07-11T13:18:53.344406 p:4148 t:4160 [LOG] Debug logging disabled
+2014-07-11T13:18:53.344406 p:4148 t:4160 [LOG] > MM Studio version: 1.4.17
+2014-07-11T13:18:53.344406 p:4148 t:4160 [LOG] > MMCore version 2.3.2
+2014-07-11T13:18:53.344406 p:4148 t:4160 [LOG] > Device API version 57, Module API version 8
+2014-07-11T13:18:53.344406 p:4148 t:4160 [LOG] > Operating System: Windows 7 (amd64) 6.1
+2014-07-11T13:18:53.344406 p:4148 t:4160 [LOG] > JVM: Java HotSpot(TM) 64-Bit Server VM, version 1.7.0, 64-bit
+2014-07-11T13:18:54.609533 p:4148 t:4160 [LOG] System state cache updated.
+2014-07-11T13:18:54.612533 p:4148 t:4160 [LOG] > Startup script file (C:\Program Files\Micro-Manager-1.4\mmplugins\MicroscopeControl\src\org\micromanager\MicroscopeControl\MMStartup.bsh) not present.
+2014-07-11T13:19:44.914563 p:1492 t:492 [LOG] -------->>
+2014-07-11T13:19:44.914563 p:1492 t:492 [LOG] Core session started by herrmannsdoerfer on AN12589
+2014-07-11T13:19:44.914563 p:1492 t:492 [LOG] Debug logging disabled
+2014-07-11T13:19:44.914563 p:1492 t:492 [LOG] Debug logging disabled
+2014-07-11T13:19:44.914563 p:1492 t:492 [LOG] > MM Studio version: 1.4.17
+2014-07-11T13:19:44.914563 p:1492 t:492 [LOG] > MMCore version 2.3.2
+2014-07-11T13:19:44.914563 p:1492 t:492 [LOG] > Device API version 57, Module API version 8
+2014-07-11T13:19:44.914563 p:1492 t:492 [LOG] > Operating System: Windows 7 (amd64) 6.1
+2014-07-11T13:19:44.914563 p:1492 t:492 [LOG] > JVM: Java HotSpot(TM) 64-Bit Server VM, version 1.8.0_05, 64-bit
+2014-07-11T13:19:46.506722 p:1492 t:492 [LOG] System state cache updated.
+2014-07-11T13:19:46.509722 p:1492 t:492 [LOG] > Startup script file (C:\Program Files\Micro-Manager-1.4\mmplugins\MicroscopeControl\src\org\micromanager\MicroscopeControl\MMStartup.bsh) not present.
+2014-07-11T13:29:38.571119 p:2476 t:2656 [LOG] -------->>
+2014-07-11T13:29:38.571119 p:2476 t:2656 [LOG] Core session started by herrmannsdoerfer on AN12589
+2014-07-11T13:29:38.571119 p:2476 t:2656 [LOG] Debug logging disabled
+2014-07-11T13:29:38.571119 p:2476 t:2656 [LOG] Debug logging disabled
+2014-07-11T13:29:38.571119 p:2476 t:2656 [LOG] > MM Studio version: 1.4.17
+2014-07-11T13:29:38.571119 p:2476 t:2656 [LOG] > MMCore version 2.3.2
+2014-07-11T13:29:38.571119 p:2476 t:2656 [LOG] > Device API version 57, Module API version 8
+2014-07-11T13:29:38.571119 p:2476 t:2656 [LOG] > Operating System: Windows 7 (amd64) 6.1
+2014-07-11T13:29:38.572119 p:2476 t:2656 [LOG] > JVM: Java HotSpot(TM) 64-Bit Server VM, version 1.8.0_05, 64-bit
+2014-07-11T13:29:41.132119 p:2476 t:2656 [LOG] All devices unloaded.
+2014-07-11T13:29:41.133119 p:2476 t:2656 [LOG] Device COM3 loaded from SerialManager and labeled as COM3
+2014-07-11T13:29:41.133119 p:2476 t:2656 [LOG] Device COM8 loaded from SerialManager and labeled as COM8
+2014-07-11T13:29:41.133119 p:2476 t:2656 [LOG] Device COM4 loaded from SerialManager and labeled as COM4
+2014-07-11T13:29:41.144119 p:2476 t:2656 [LOG] Device Andor loaded from Andor and labeled as iXon Ultra
+2014-07-11T13:29:41.144119 p:2476 t:2656 [LOG] Device CoherentCube loaded from CoherentCube and labeled as CoherentCube405
+2014-07-11T13:29:41.144119 p:2476 t:2656 [LOG] Device CoherentCube loaded from CoherentCube and labeled as CoherentCube661
+2014-07-11T13:29:41.145119 p:2476 t:2656 [LOG] Device E-709 loaded from PI_GCS_2 and labeled as E-709
+2014-07-11T13:29:41.145119 p:2476 t:2656 [LOG] Device PIZStage loaded from PI_GCS_2 and labeled as PIZStage
+2014-07-11T13:29:41.145119 p:2476 t:2656 [LOG] Error occurred. Device iXon Ultra. Error in device iXon Ultra: Invalid property name encountered: Camera. (Error code: 2)
+2014-07-11T13:29:41.145119 p:2476 t:2656 [LOG] Starting initialization sequence for 8 devices...
+2014-07-11T13:29:41.145119 p:2476 t:2656 [LOG] Device COM3 message: open: Access is denied
+2014-07-11T13:29:41.145119 p:2476 t:2656 [LOG] Error occurred. Device COM3. Error in device COM3: Unknown error in the device. 
+, file MMCore.cpp, line 929
+2014-07-11T13:29:41.145119 p:2476 t:2656 [LOG] Auto shutter ON.
+2014-07-11T13:29:41.146119 p:2476 t:2656 [LOG] > 
+java.lang.Exception: Line 17: Property,iXon Ultra,Camera,| iXon Ultra | DU897_BV | 8107 |
+Error in device iXon Ultra: Invalid property name encountered: Camera. (Error code: 2)
+
+Line 52: Property,Core,Initialize,1
+Error in device COM3: Unknown error in the device. 
+
+Line 57: Property,Core,Camera,iXon Ultra
+Cannot set Core property Camera to invalid value "iXon Ultra"
+
+Line 58: Property,Core,Focus,PIZStage
+Cannot set Core property Focus to invalid value "PIZStage"
+
+ in Thread[AWT-EventQueue-0,6,main]
+  at mmcorej.MMCoreJJNI.CMMCore_loadSystemConfiguration(Native Method)
+  at mmcorej.CMMCore.loadSystemConfiguration(CMMCore.java:345)
+  at org.micromanager.MMStudioMainFrame.loadSystemConfiguration(MMStudioMainFrame.java:3095)
+  at org.micromanager.MMStudioMainFrame.access$2100(MMStudioMainFrame.java:147)
+  at org.micromanager.MMStudioMainFrame$1.windowOpened(MMStudioMainFrame.java:526)
+  at java.awt.AWTEventMulticaster.windowOpened(Unknown Source)
+  at java.awt.Window.processWindowEvent(Unknown Source)
+  at javax.swing.JFrame.processWindowEvent(Unknown Source)
+  at java.awt.Window.processEvent(Unknown Source)
+  at java.awt.Component.dispatchEventImpl(Unknown Source)
+  at java.awt.Container.dispatchEventImpl(Unknown Source)
+  at java.awt.Window.dispatchEventImpl(Unknown Source)
+  at java.awt.Component.dispatchEvent(Unknown Source)
+  at java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+  at java.awt.EventQueue.access$400(Unknown Source)
+  at java.awt.EventQueue$3.run(Unknown Source)
+  at java.awt.EventQueue$3.run(Unknown Source)
+  at java.security.AccessController.doPrivileged(Native Method)
+  at java.security.ProtectionDomain$1.doIntersectionPrivilege(Unknown Source)
+  at java.security.ProtectionDomain$1.doIntersectionPrivilege(Unknown Source)
+  at java.awt.EventQueue$4.run(Unknown Source)
+  at java.awt.EventQueue$4.run(Unknown Source)
+  at java.security.AccessController.doPrivileged(Native Method)
+  at java.security.ProtectionDomain$1.doIntersectionPrivilege(Unknown Source)
+  at java.awt.EventQueue.dispatchEvent(Unknown Source)
+  at java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+  at java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+  at java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+  at java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+  at java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+  at java.awt.EventDispatchThread.run(Unknown Source)
+2014-07-11T13:29:42.551119 p:2476 t:2656 [LOG] System state cache updated.
+2014-07-11T13:29:42.556119 p:2476 t:2656 [LOG] > Startup script file (C:\Program Files\Micro-Manager-1.4\mmplugins\MicroscopeControl\src\org\micromanager\MicroscopeControl\MMStartup.bsh) not present.
+2014-07-11T13:30:11.058119 p:3108 t:4112 [LOG] -------->>
+2014-07-11T13:30:11.058119 p:3108 t:4112 [LOG] Core session started by herrmannsdoerfer on AN12589
+2014-07-11T13:30:11.058119 p:3108 t:4112 [LOG] Debug logging disabled
+2014-07-11T13:30:11.058119 p:3108 t:4112 [LOG] Debug logging disabled
+2014-07-11T13:30:11.058119 p:3108 t:4112 [LOG] > MM Studio version: 1.4.17
+2014-07-11T13:30:11.058119 p:3108 t:4112 [LOG] > MMCore version 2.3.2
+2014-07-11T13:30:11.058119 p:3108 t:4112 [LOG] > Device API version 57, Module API version 8
+2014-07-11T13:30:11.058119 p:3108 t:4112 [LOG] > Operating System: Windows 7 (amd64) 6.1
+2014-07-11T13:30:11.058119 p:3108 t:4112 [LOG] > JVM: Java HotSpot(TM) 64-Bit Server VM, version 1.8.0_05, 64-bit
+2014-07-11T13:30:12.977119 p:3108 t:4112 [LOG] All devices unloaded.
+2014-07-11T13:30:12.979119 p:3108 t:4112 [LOG] Device COM3 loaded from SerialManager and labeled as COM3
+2014-07-11T13:30:12.979119 p:3108 t:4112 [LOG] Device COM8 loaded from SerialManager and labeled as COM8
+2014-07-11T13:30:12.979119 p:3108 t:4112 [LOG] Device COM4 loaded from SerialManager and labeled as COM4
+2014-07-11T13:30:20.727119 p:3108 t:4112 [LOG] Device Andor loaded from Andor and labeled as iXon Ultra
+2014-07-11T13:30:20.728119 p:3108 t:4112 [LOG] Device CoherentCube loaded from CoherentCube and labeled as CoherentCube405
+2014-07-11T13:30:20.728119 p:3108 t:4112 [LOG] Device CoherentCube loaded from CoherentCube and labeled as CoherentCube661
+2014-07-11T13:30:20.729119 p:3108 t:4112 [LOG] Device E-709 loaded from PI_GCS_2 and labeled as E-709
+2014-07-11T13:30:20.729119 p:3108 t:4112 [LOG] Device PIZStage loaded from PI_GCS_2 and labeled as PIZStage
+2014-07-11T13:30:20.730119 p:3108 t:4112 [LOG] Starting initialization sequence for 8 devices...
+2014-07-11T13:30:20.781119 p:3108 t:4112 [LOG] Device COM3 initialized.
+2014-07-11T13:30:20.797119 p:3108 t:4112 [LOG] Device COM8 initialized.
+2014-07-11T13:30:20.850119 p:3108 t:4112 [LOG] Device COM4 initialized.
+2014-07-11T13:30:20.854119 p:3108 t:4112 [LOG] Device iXon Ultra message: Camera version info: 
+EPROM: 0
+COF File: 0
+Driver: 0.0
+DLL: 2.95
+2014-07-11T13:30:21.694119 p:3108 t:4112 [LOG] Device iXon Ultra message: PrepareSnap();
+2014-07-11T13:30:22.274119 p:3108 t:4112 [LOG] Device iXon Ultra set as default camera.
+2014-07-11T13:30:22.274119 p:3108 t:4112 [LOG] Device iXon Ultra initialized.
+2014-07-11T13:30:22.274119 p:3108 t:4112 [LOG] Device CoherentCube405 message: CoherentCube::Initialize()
+2014-07-11T13:30:22.774119 p:3108 t:4112 [LOG] Device COM3 message: TERM_TIMEOUT error occured!
+2014-07-11T13:30:22.774119 p:3108 t:4112 [LOG] Error occurred. Device COM3. Error in device COM3: Error code 107 (6b hex).
+2014-07-11T13:30:22.899119 p:3108 t:4112 [LOG] Device CoherentCube405 set as default shutter.
+2014-07-11T13:30:22.899119 p:3108 t:4112 [LOG] Device CoherentCube405 initialized.
+2014-07-11T13:30:22.899119 p:3108 t:4112 [LOG] Device CoherentCube661 message: CoherentCube::Initialize()
+2014-07-11T13:30:23.399119 p:3108 t:4112 [LOG] Device COM4 message: TERM_TIMEOUT error occured!
+2014-07-11T13:30:23.399119 p:3108 t:4112 [LOG] Error occurred. Device COM4. Error in device COM4: Error code 107 (6b hex).
+2014-07-11T13:30:23.501119 p:3108 t:4112 [LOG] Device CoherentCube661 set as default shutter.
+2014-07-11T13:30:23.501119 p:3108 t:4112 [LOG] Device CoherentCube661 initialized.
+2014-07-11T13:30:23.645119 p:3108 t:4112 [LOG] Device E-709 initialized.
+2014-07-11T13:30:23.662119 p:3108 t:4112 [LOG] Device PIZStage message: Connected to: PHYSIK INSTRUMENTE,E-709,0113045830,4.000
+2014-07-11T13:30:23.678119 p:3108 t:4112 [LOG] Device PIZStage initialized.
+2014-07-11T13:30:23.678119 p:3108 t:4112 [LOG] Camera device set to iXon Ultra
+2014-07-11T13:30:23.678119 p:3108 t:4112 [LOG] Focus device set to PIZStage
+2014-07-11T13:30:23.678119 p:3108 t:4112 [LOG] Auto shutter ON.
+2014-07-11T13:30:24.140119 p:3108 t:4112 [LOG] System state cache updated.
+2014-07-11T13:30:24.634119 p:3108 t:4112 [LOG] System state cache updated.
+2014-07-11T13:30:24.654119 p:3108 t:4112 [LOG] > Startup script file (C:\Program Files\Micro-Manager-1.4\mmplugins\MicroscopeControl\src\org\micromanager\MicroscopeControl\MMStartup.bsh) not present.
+2014-07-11T13:36:04.755119 p:4464 t:3536 [LOG] -------->>
+2014-07-11T13:36:04.756119 p:4464 t:3536 [LOG] Core session started by herrmannsdoerfer on AN12589
+2014-07-11T13:36:04.756119 p:4464 t:3536 [LOG] Debug logging disabled
+2014-07-11T13:36:04.756119 p:4464 t:3536 [LOG] Debug logging disabled
+2014-07-11T13:36:04.756119 p:4464 t:3536 [LOG] > MM Studio version: 1.4.17
+2014-07-11T13:36:04.756119 p:4464 t:3536 [LOG] > MMCore version 2.3.2
+2014-07-11T13:36:04.756119 p:4464 t:3536 [LOG] > Device API version 57, Module API version 8
+2014-07-11T13:36:04.756119 p:4464 t:3536 [LOG] > Operating System: Windows 7 (amd64) 6.1
+2014-07-11T13:36:04.756119 p:4464 t:3536 [LOG] > JVM: Java HotSpot(TM) 64-Bit Server VM, version 1.6.0_25, 64-bit
+2014-07-11T13:36:06.561119 p:4464 t:3536 [LOG] All devices unloaded.
+2014-07-11T13:36:06.563119 p:4464 t:3536 [LOG] Device COM3 loaded from SerialManager and labeled as COM3
+2014-07-11T13:36:06.563119 p:4464 t:3536 [LOG] Device COM8 loaded from SerialManager and labeled as COM8
+2014-07-11T13:36:06.563119 p:4464 t:3536 [LOG] Device COM4 loaded from SerialManager and labeled as COM4
+2014-07-11T13:36:14.316119 p:4464 t:3536 [LOG] Device Andor loaded from Andor and labeled as iXon Ultra
+2014-07-11T13:36:14.317119 p:4464 t:3536 [LOG] Device CoherentCube loaded from CoherentCube and labeled as CoherentCube405
+2014-07-11T13:36:14.317119 p:4464 t:3536 [LOG] Device CoherentCube loaded from CoherentCube and labeled as CoherentCube661
+2014-07-11T13:36:14.318119 p:4464 t:3536 [LOG] Device E-709 loaded from PI_GCS_2 and labeled as E-709
+2014-07-11T13:36:14.318119 p:4464 t:3536 [LOG] Device PIZStage loaded from PI_GCS_2 and labeled as PIZStage
+2014-07-11T13:36:14.319119 p:4464 t:3536 [LOG] Starting initialization sequence for 8 devices...
+2014-07-11T13:36:14.372119 p:4464 t:3536 [LOG] Device COM3 initialized.
+2014-07-11T13:36:14.388119 p:4464 t:3536 [LOG] Device COM8 initialized.
+2014-07-11T13:36:14.442119 p:4464 t:3536 [LOG] Device COM4 initialized.
+2014-07-11T13:36:14.445119 p:4464 t:3536 [LOG] Device iXon Ultra message: Camera version info: 
+EPROM: 0
+COF File: 0
+Driver: 0.0
+DLL: 2.95
+2014-07-11T13:36:15.262119 p:4464 t:3536 [LOG] Device iXon Ultra message: PrepareSnap();
+2014-07-11T13:36:15.829119 p:4464 t:3536 [LOG] Device iXon Ultra set as default camera.
+2014-07-11T13:36:15.829119 p:4464 t:3536 [LOG] Device iXon Ultra initialized.
+2014-07-11T13:36:15.829119 p:4464 t:3536 [LOG] Device CoherentCube405 message: CoherentCube::Initialize()
+2014-07-11T13:36:16.329119 p:4464 t:3536 [LOG] Device COM3 message: TERM_TIMEOUT error occured!
+2014-07-11T13:36:16.329119 p:4464 t:3536 [LOG] Error occurred. Device COM3. Error in device COM3: Error code 107 (6b hex).
+2014-07-11T13:36:16.447119 p:4464 t:3536 [LOG] Device CoherentCube405 set as default shutter.
+2014-07-11T13:36:16.447119 p:4464 t:3536 [LOG] Device CoherentCube405 initialized.
+2014-07-11T13:36:16.447119 p:4464 t:3536 [LOG] Device CoherentCube661 message: CoherentCube::Initialize()
+2014-07-11T13:36:16.947119 p:4464 t:3536 [LOG] Device COM4 message: TERM_TIMEOUT error occured!
+2014-07-11T13:36:16.947119 p:4464 t:3536 [LOG] Error occurred. Device COM4. Error in device COM4: Error code 107 (6b hex).
+2014-07-11T13:36:17.047119 p:4464 t:3536 [LOG] Device CoherentCube661 set as default shutter.
+2014-07-11T13:36:17.047119 p:4464 t:3536 [LOG] Device CoherentCube661 initialized.
+2014-07-11T13:36:17.188119 p:4464 t:3536 [LOG] Device E-709 initialized.
+2014-07-11T13:36:17.204119 p:4464 t:3536 [LOG] Device PIZStage message: Connected to: PHYSIK INSTRUMENTE,E-709,0113045830,4.000
+2014-07-11T13:36:17.220119 p:4464 t:3536 [LOG] Device PIZStage initialized.
+2014-07-11T13:36:17.220119 p:4464 t:3536 [LOG] Camera device set to iXon Ultra
+2014-07-11T13:36:17.220119 p:4464 t:3536 [LOG] Focus device set to PIZStage
+2014-07-11T13:36:17.220119 p:4464 t:3536 [LOG] Auto shutter ON.
+2014-07-11T13:36:17.682119 p:4464 t:3536 [LOG] System state cache updated.
+2014-07-11T13:36:18.176119 p:4464 t:3536 [LOG] System state cache updated.
+2014-07-11T13:36:18.197119 p:4464 t:3536 [LOG] > Startup script file (C:\Program Files\Micro-Manager-1.4\mmplugins\MicroscopeControl\src\org\micromanager\MicroscopeControl\MMStartup.bsh) not present.

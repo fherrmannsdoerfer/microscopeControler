@@ -29,7 +29,7 @@ import java.awt.event.ActionListener;
 import javax.swing.BoxLayout;
 
 import org.micromanager.MMStudioMainFrame;
-import org.micromanager.api.AcquisitionEngine;
+//import org.micromanager.api.AcquisitionEngine;
 
 import mmcorej.CMMCore;
 
@@ -124,8 +124,8 @@ public class LaserPanel extends JPanel {
 		verticalBox.add(btnSwitchLaser);
 
 		try {
-            imgON = ImageIO.read(new File("C:\\Users\\herrmannsdoerfer\\Documents\\Projects\\New Microscopy setup\\Software\\EclipseWS\\testAnzeige\\src\\testAnzeige\\on.png"));
-            imgOFF = ImageIO.read(new File("C:\\Users\\herrmannsdoerfer\\Documents\\Projects\\New Microscopy setup\\Software\\EclipseWS\\testAnzeige\\src\\testAnzeige\\off.png"));
+            imgON = ImageIO.read(new File("C:\\Program Files\\Micro-Manager-1.4\\mmplugins\\MicroscopeControl\\src\\org\\micromanager\\MicroscopeControl\\src\\microscopeControl\\on.png"));
+            imgOFF = ImageIO.read(new File("C:\\Program Files\\Micro-Manager-1.4\\mmplugins\\MicroscopeControl\\src\\org\\micromanager\\MicroscopeControl\\src\\microscopeControl\\off.png"));
             btnSwitchLaser.setIcon(new ImageIcon(imgOFF.getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
             btnSwitchLaser.setHorizontalTextPosition(JButton.CENTER);
             btnSwitchLaser.setVerticalTextPosition(JButton.CENTER);
@@ -137,6 +137,20 @@ public class LaserPanel extends JPanel {
 		btnSwitchLaser.addActionListener(btnSwitchLaser_actionListener);
 	}
 
+	public void increaseLaserPower(double increment){	
+		try {
+			double currVal = Double.valueOf(core.getProperty(laserName, "PowerSetpoint"));
+			double newVal = currVal + increment;
+			if (newVal<= maxVal){
+				core.setProperty(laserName, "PowerSetpoint", currVal + increment);
+				slrLaserIntensity.setValue((int) (newVal)*scale);
+				txtLaserIntensity.setText(String.valueOf(newVal));
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	ActionListener txtLaserIntensity_ActionListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {

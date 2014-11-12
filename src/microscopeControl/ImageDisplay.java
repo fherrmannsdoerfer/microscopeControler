@@ -4,6 +4,7 @@ package microscopeControl;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.ImageCanvas;
+import ij.gui.Roi;
 import ij.io.Opener;
 
 import javax.imageio.ImageIO;
@@ -18,8 +19,12 @@ import java.awt.Dimension;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.File;
@@ -50,6 +55,9 @@ public class ImageDisplay extends JPanel {
 	JCheckBox chkboxLockValues;
 	JLabel lblScale;
 	double scale = 1;
+	Rectangle rect = new Rectangle();
+	CameraControl camControl;
+	boolean isPressed;
 	/**
 	 * Create the panel.
 	 */
@@ -72,6 +80,50 @@ public class ImageDisplay extends JPanel {
 		
 		
 		lblImageLabel = new JLabel();
+		lblImageLabel.addMouseMotionListener(new MouseMotionAdapter() {
+			public void mouseDragged(MouseEvent arg0) {
+				if (arg0.getX()<256 && isPressed){
+					System.out.println(" arg0.getX: "+arg0.getX()+" rect.width: "+rect.width);
+					
+					rect.width = arg0.getX() - rect.x;
+					rect.height = arg0.getY() - rect.y;
+					
+					ImageIcon img =(ImageIcon) lblImageLabel.getIcon();
+					BufferedImage buImg = new BufferedImage(img.getIconWidth(), img.getIconHeight(), BufferedImage.TYPE_INT_ARGB); 
+					buImg.getGraphics().drawImage(img.getImage(), 0,0,img.getImageObserver());
+					ImagePlus imp = new ImagePlus("",buImg);
+					imp.getProcessor().setColor(255);
+					imp.getProcessor().draw(new Roi(rect.x, rect.y, rect.width, rect.height));
+					//imp.draw(rect.x, rect.y, rect.width, rect.height);
+					lblImageLabel.setIcon(new ImageIcon(imp.getBufferedImage()));
+				}
+			}
+		});
+		lblImageLabel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				if (arg0.getX()<256){
+					rect.x = arg0.getX();
+					rect.y = arg0.getY();
+					camControl.setRectX(arg0.getX());
+					camControl.setRectY(arg0.getY());
+					System.out.println("anfang x:"+rect.x+" y: "+rect.y);
+					isPressed = true;
+				}
+			}
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				if (arg0.getX()<256 && isPressed){
+					rect.width = arg0.getX() - rect.x;
+					rect.height = arg0.getY() - rect.y;
+					camControl.setRectWidth(rect.width);
+					camControl.setRectHeight(rect.height);
+					System.out.println("ende x:"+(rect.x+rect.width)+" y: "+(rect.y+rect.height)+" ende x:"+ arg0.getX()+" y: "+ arg0.getY());
+					camControl.setRect(rect);
+					isPressed = false;
+				}
+			}
+		});
 		lblImageLabel.setMaximumSize(new Dimension(2000000, 2000000));
 		lblImageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		lblImageLabel.setMinimumSize(new Dimension(512, 512));
@@ -243,39 +295,49 @@ public class ImageDisplay extends JPanel {
 	void updateImage(String path){
 		//System.out.println(path);
 		ImagePlus imp = IJ.openImage(path); 
-		currImagePlus = imp;
-        currImage = new ImageIcon(imp.getBufferedImage());
-		//System.out.println(currImage.getIconHeight()+" "+ currImage.getIconWidth());
-		if (currImage != null && lblImageLabel != null) {
-			//System.out.println("kein nullpointer");
-			lblImageLabel.setIcon(currImage);
-			//this.repaint();
+		if (imp != null) {
+			drawImage(imp);
 		}
-		else {
-			System.out.println("nullpointer");
-		}
-		setValues();
 	}
 	
 	void updateImage(ImagePlus imp){
+		drawImage(imp);
+
+	}
+	void drawImage(ImagePlus imp) {
 		currImagePlus = imp;
 		imp = setRange(imp);
 		setSliders(imp);
+		addRect(imp);
+		if (camControl.showMiddleLine()){
+			addMiddleLine(imp);
+		}
 		impb = imp.getBufferedImage();
 		impb = scaleImage(impb,scale);
-		drawImage(impb);
-        
-	}
-	void drawImage(BufferedImage impb) {
 		currImage = new ImageIcon(impb);
-        
-		if (currImage != null && lblImageLabel != null) {
+		if (currImage != null) {
 			lblImageLabel.setIcon(currImage);
 			setValues();
 		}
 		else {
 			System.out.println("nullpointer");
 		}
+	}
+	void addMiddleLine(ImagePlus imp){
+		try{
+			imp.getProcessor().setColor(10);
+			imp.getProcessor().drawLine(255, 0, 255, 511);
+			imp.getProcessor().drawLine(256, 0, 256, 511);
+		}
+		catch(Error e){}
+	}
+	void addRect(ImagePlus imp){
+		try{
+			imp.getProcessor().draw(new Roi(rect.x, rect.y, rect.width, rect.height));
+			imp.getProcessor().drawRoi(new Roi(rect.x+(camControl.getShiftX()), (rect.y+camControl.getShiftY()), rect.width, rect.height));
+			imp.getProcessor().drawRect(rect.x+(camControl.getShiftX()), (rect.y+camControl.getShiftY()), rect.width, rect.height);
+		}
+		catch(Error e){System.out.println(e.toString());}
 	}
 	
 	BufferedImage scaleImage(BufferedImage impb, double scale){
@@ -300,10 +362,10 @@ public class ImageDisplay extends JPanel {
 			slrMaxRange.setMinimum((int) (currentImageMinimum - 0.1*currentImageRange));
 			slrMinRange.setValue((int) currentImageMinimum);
 		}
-		System.out.println("Math.abs(currentImageMaximum - currentSlrMinRangeMaximum): "+Math.abs(currentImageMaximum - currentSlrMinRangeMaximum));
-		System.out.println("currentImageRange: "+currentImageRange);
-		System.out.println("slrMinRange.getMinimum(): "+slrMinRange.getMinimum());
-		System.out.println("slrMinRange.getMaxmum(): "+slrMinRange.getMaximum());
+		//System.out.println("Math.abs(currentImageMaximum - currentSlrMinRangeMaximum): "+Math.abs(currentImageMaximum - currentSlrMinRangeMaximum));
+		//System.out.println("currentImageRange: "+currentImageRange);
+		//System.out.println("slrMinRange.getMinimum(): "+slrMinRange.getMinimum());
+		//System.out.println("slrMinRange.getMaxmum(): "+slrMinRange.getMaximum());
 		if (Math.abs(currentImageMaximum - currentSlrMinRangeMaximum) / (1.0*currentImageRange) > 0.1 && !chkboxLockValues.isSelected()) {
 			slrMinRange.setMaximum((int) (currentImageMaximum + 0.1*currentImageRange));
 			slrMaxRange.setMaximum((int) (currentImageMaximum + 0.1*currentImageRange));
@@ -387,7 +449,7 @@ public class ImageDisplay extends JPanel {
 			System.out.println(scale);
 			scale = scale * 2;
 			lblScale.setText(String.valueOf(scale));
-			drawImage(impb);
+			drawImage(currImagePlus);
 		}
 	};
 	ActionListener btnZoomOutActionListener =new ActionListener() {
@@ -395,7 +457,14 @@ public class ImageDisplay extends JPanel {
 			System.out.println(scale);
 			scale = scale / 2;			
 			lblScale.setText(String.valueOf(scale));
-			drawImage(impb);
+			drawImage(currImagePlus);
 		}
 	};
+	
+	void setCameraControl(CameraControl camControl){
+		this.camControl = camControl;
+	}
+	void resetRect(){
+		rect = new Rectangle();
+	}
 }

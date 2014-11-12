@@ -128,8 +128,23 @@ public class PifocControllWidget extends JPanel {
 		Component horizontalGlue_1 = Box.createHorizontalGlue();
 		horizontalBox.add(horizontalGlue_1);
 		
-		JCheckBox chckbxNewCheckBox = new JCheckBox("New check box");
-		horizontalBox.add(chckbxNewCheckBox);
+		final JCheckBox chkboxFokusLock = new JCheckBox("Fokus Lock");
+		chkboxFokusLock.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					if (chkboxFokusLock.isSelected()){
+						core.setProperty("PIZStage", "External sensor",1);
+					}
+					else {
+						core.setProperty("PIZStage", "External sensor",0);
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		horizontalBox.add(chkboxFokusLock);
 		
 		Component verticalGlue = Box.createVerticalGlue();
 		verticalBox.add(verticalGlue);

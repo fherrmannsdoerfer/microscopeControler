@@ -32,7 +32,9 @@ import java.awt.Dimension;
 import javax.swing.border.TitledBorder;
 
 import org.micromanager.MMStudioMainFrame;
-import org.micromanager.api.AcquisitionEngine;
+//import org.micromanager.api.AcquisitionEngine;
+
+import org.micromanager.acquisition.AcquisitionEngine;
 
 import mmcorej.CMMCore;
 
@@ -46,6 +48,8 @@ public class MainFrame extends JFrame {
 	private AcquisitionEngine acq;
 	static String latestImage;
 	private PifocControllWidget pcw;
+	private ArduinoControl ac;
+	final MonitorWidget mw;
 	JLabel lblCameraStatus;
 	JLabel lblAction;
 	JLabel lblFrameCount;
@@ -82,7 +86,7 @@ public class MainFrame extends JFrame {
 					double r = (generator.nextDouble()-0.25-0.000001*i);
 					mmw.addPoint(r*300000);
 				}*/
-    			System.out.println("in message loop main Frame");
+    			//System.out.println("in message loop main Frame");
 				id.updateImage(latestImage);
 				
     			mmw.repaint();
@@ -133,6 +137,11 @@ public class MainFrame extends JFrame {
 		verticalBox_1.add(id);
 		//id.updateImage("file:///C://Users//herrmannsdoerfer//Desktop//Series017_z000.tif");
 		
+		//ac = new ArduinoControl(core_);
+		//ac.setBorder(new TitledBorder(null, "Arduino Data", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		//ac.setAlignmentX(Component.LEFT_ALIGNMENT);
+		//verticalBox_1.add(ac);
+		
 		pcw = new PifocControllWidget(this, core_);
 		pcw.setAlignmentX(Component.LEFT_ALIGNMENT);
 		verticalBox_1.add(pcw);
@@ -147,21 +156,13 @@ public class MainFrame extends JFrame {
 		Box horizontalBox = Box.createHorizontalBox();
 		verticalBox.add(horizontalBox);
 		
-		Box horizontalBox_2 = Box.createHorizontalBox();
-		verticalBox.add(horizontalBox_2);
+		final LaserControl lc = new LaserControl(core);
+		verticalBox.add(lc);
 		
-		Box horizontalBox_1 = Box.createHorizontalBox();
-		horizontalBox_1.setBorder(new TitledBorder(null, "Laser Control", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		horizontalBox_2.add(horizontalBox_1);
-		
-		final LaserPanel lp = new LaserPanel(core, "CoherentCube661","661 nm");
-		horizontalBox_1.add(lp);
-		final LaserPanel lp2 = new LaserPanel(core, "CoherentCube405","405 nm");
-		horizontalBox_1.add(lp2);
 		cc = new CameraControl(this, core, acq,"iXon Ultra");
 		verticalBox.add(cc);
 		
-		final MonitorWidget mw = new MonitorWidget(core);
+		mw = new MonitorWidget(core);
 		mw.setPreferredSize(new Dimension(300, 60));
 		verticalBox.add(mw);
 		mw.setMinimumSize(new Dimension(0, 0));
@@ -192,6 +193,19 @@ public class MainFrame extends JFrame {
 		
 		lblFrameCount = new JLabel("New label");
 		horizontalBox_4.add(lblFrameCount);
+		
+		cc.setArduinoControl(ac);
+		cc.setImageDisplay(id);
+		id.setCameraControl(cc);
+		
+		final CountBlinkingEvents cbe = new CountBlinkingEvents();
+		
+		cc.addPSFRateCountRequiredListener(new PSFRateCountRequiredListener(){
+			public void PSFRateCountRequiredEventOccured(PSFRateCountRequiredEvent event){
+				int number = cbe.findNumberOfBlinkingEvents(event.getImage());
+				lc.addBlinkingNumber(number);
+			}
+		});
 		
 		//Thread t = new Thread(new MessageLoop(mw));
         //t.start();
@@ -248,6 +262,10 @@ public class MainFrame extends JFrame {
 				core.setProperty("CoherentCube661", "PowerSetpoint",0.1);
 				core.setProperty("CoherentCube405", "PowerSetpoint",0.1);
 				core.setProperty("iXon Ultra", "Shutter (Internal)","Closed");
+				ac.stopThreads();
+				cc.stopThreads();
+				mw.stopThreads();
+				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

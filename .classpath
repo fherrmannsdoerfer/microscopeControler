@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/AbsoluteLayout.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/bsh-2.0b4.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/clojure.jar"/>
@@ -27,5 +26,7 @@
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/trident.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/TSFProto.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/ij.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/Micro-Manager-1.4"/>
+	<classpathentry kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/rsyntaxtextarea.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

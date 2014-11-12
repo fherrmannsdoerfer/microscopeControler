@@ -21,7 +21,8 @@ import java.awt.ComponentOrientation;
 
 import javax.swing.border.TitledBorder;
 
-import org.micromanager.api.AcquisitionEngine;
+//import org.micromanager.api.AcquisitionEngine;
+
 
 import mmcorej.CMMCore;
 
@@ -45,6 +46,8 @@ public class MonitorWidget extends JPanel {
 	double roundToYAxis = 0.1;
 	int timeIntervalX = 1;
 	int counter = 0;
+	Thread UpdateZPositionThread;
+	boolean threadShouldStayRunning = true;
 	CMMCore core;
 	/**
 	 * Create the panel.
@@ -55,7 +58,7 @@ public class MonitorWidget extends JPanel {
 		
 		public void run(){
 
-			while (1==1) {
+			while (threadShouldStayRunning) {
 				try {
 					counter = counter + 1;
 					String currZ = core.getProperty("PIZStage", "Position");
@@ -64,7 +67,7 @@ public class MonitorWidget extends JPanel {
 					Thread.sleep(1000);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 				
 			}
@@ -127,9 +130,13 @@ public class MonitorWidget extends JPanel {
 		lblXHigh = new JLabel("0");
 		horizontalBox.add(lblXHigh);
 		
-		Thread UpdateZPositionThread = new Thread(new UpdateZPosition());
+		UpdateZPositionThread = new Thread(new UpdateZPosition());
 		UpdateZPositionThread.start();
 	
+	}
+	
+	public void stopThreads(){
+		threadShouldStayRunning = false;
 	}
 	
 	void addPoint(double np) {

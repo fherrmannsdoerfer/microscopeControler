@@ -2,10 +2,13 @@ package microscopeControl;
 
 import javax.swing.JFrame;
 
+import org.micromanager.acquisition.AcquisitionEngine;
 import org.micromanager.api.ScriptInterface;
+
 import mmcorej.CMMCore;
+
 import org.micromanager.MMStudioMainFrame;
-import org.micromanager.api.AcquisitionEngine;
+//import org.micromanager.api.AcquisitionEngine;
 
 public class MainClass implements org.micromanager.api.MMPlugin{
    public static String menuName = "MicroscopeControl";
@@ -38,7 +41,6 @@ public class MainClass implements org.micromanager.api.MMPlugin{
    public String getVersion() {
       return "1.0";
    }
-   @Override
    public void configurationChanged() {
       // TODO Auto-generated method stub
    }

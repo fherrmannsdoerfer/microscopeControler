@@ -1,8 +1,11 @@
 package microscopeControl;
 
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.io.FileSaver;
+import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
@@ -22,6 +25,7 @@ import java.awt.Dimension;
 
 import javax.swing.SwingConstants;
 
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.BorderLayout;
 import java.awt.Rectangle;
@@ -37,7 +41,20 @@ import javax.swing.BoxLayout;
 
 
 
+
+
+
+
+
+
+
+
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.micromanager.acquisition.AcquisitionData;
 import org.micromanager.acquisition.AcquisitionEngine;
+import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
 //import org.micromanager.api.AcquisitionEngine;
 import org.micromanager.utils.ImageUtils;
 
@@ -95,6 +112,7 @@ public class CameraControl extends JPanel {
 	ArduinoControl arduinoControl;
 	JComboBox comboBoxWhichPart;
 	boolean threadShouldStayRunning = true;
+	boolean aquisitionShouldContinue = true;
 	
 	class TimeLoop implements Runnable {
 		public TimeLoop(){}
@@ -219,16 +237,17 @@ public class CameraControl extends JPanel {
 	    	try {
 	    		
 	    		boolean success = (new File(path+"\\"+measurementTag)).mkdirs();
-	    		boolean success2 = (new File(path+"\\"+measurementTag+"\\LeftChannel")).mkdirs();
-	    		boolean success3 = (new File(path+"\\"+measurementTag+"\\RightChannel")).mkdirs();
+	    		boolean success2 = (new File(path+"\\"+measurementTag+"\\LeftChannel"+measurementTag)).mkdirs();
+	    		boolean success3 = (new File(path+"\\"+measurementTag+"\\RightChannel"+measurementTag)).mkdirs();
 	    		PrintWriter outputStream = new PrintWriter(new FileWriter(path+"\\"+measurementTag+"\\log_ArduinoVoltage"+measurementTag+".txt"));
 				outputStream.println("Automatically generated log file for Arduino Analog Input");
-				core.setCircularBufferMemoryFootprint(2000);
+				core.setCircularBufferMemoryFootprint(4000);
 				//core.prepareSequenceAcquisition(core.getCameraDevice());
 				//System.out.println("prepared");
 		    	//System.out.println(exposure);
 		    	core.setProperty(core.getCameraDevice(),"Exposure", exposure);
-		    	core.startSequenceAcquisition(nbrFrames, exposure, false);
+		    	core.startSequenceAcquisition(nbrFrames+1000, exposure, false);
+		    	aquisitionShouldContinue = true;
 		    	int frame = 0;
 		    	//System.out.println(frame);
 		    	ImageProcessor ipr;
@@ -237,8 +256,26 @@ public class CameraControl extends JPanel {
 		    	parent.setAction("Acquisition");
 	    		lblTotalFrames.setText(" / "+String.valueOf(nbrFrames));
 	    		createLogFile(measurementTag, gain, exposure, path, nbrFrames);
+	    		
+
+	            long byteDepth = core.getBytesPerPixel();
+	            int imgWidth, imgHeight;
+	            
+	            if (chckbxApplyRect.isSelected()) {
+	            	imgWidth = getRectWidth();
+	            	imgHeight =  getRectHeight();
+	            }
+	            else {
+	            	imgWidth = 256;
+	            	imgHeight = 512;
+	            }
+	           
+	       
+	            ImageStack stackLeft = new ImageStack(imgWidth, imgHeight);
+	            ImageStack stackRight = new ImageStack(imgWidth, imgHeight);
+	            
 		    	double now = System.currentTimeMillis();
-		    	while (core.getRemainingImageCount() > 0 || core.isSequenceRunning(core.getCameraDevice())) {
+		    	while (frame<nbrFrames && aquisitionShouldContinue){//core.getRemainingImageCount() > 0 || core.isSequenceRunning(core.getCameraDevice())) {//for whatever reason a few frames are always missing, so the loop will not exit...
 		    	   if (core.getRemainingImageCount() > 0) {
 		    		  //System.out.println("Remaining image count: "+core.getRemainingImageCount());
 		    		  lblCurrentFrame.setText(String.valueOf(frame+1));
@@ -251,24 +288,31 @@ public class CameraControl extends JPanel {
 		    	      if (frame%20 == 0){
 		    	    	  firePSFRateCountRequiredEvent(new PSFRateCountRequiredEvent(this, imp));
 		    	      }
+		    
 		    	      
 		    	      if (comboBoxWhichPart.getSelectedIndex() == 0){
-		    	    	  FileSaver fs = new FileSaver(channels.get(0));
-		    	    	  fname = "\\imgLeft_"+measurementTag+String.format("_%05d", frame)+".tiff";
-			    	      fs.saveAsTiff(path+"\\"+measurementTag+"\\LeftChannel"+fname);
-			    	      FileSaver fs2 = new FileSaver(channels.get(1));
-			    	      fname = "\\imgRight_"+measurementTag+String.format("_%05d", frame)+".tiff";
-			    	      fs2.saveAsTiff(path+"\\"+measurementTag+"\\RightChannel"+fname);
+		    	    	  //FileSaver fs = new FileSaver(channels.get(0));
+		    	    	  //fname = "\\imgLeft_"+measurementTag+String.format("_%05d", frame)+".tiff";
+			    	      //fs.saveAsTiff(path+"\\"+measurementTag+"\\LeftChannel"+measurementTag+fname);
+			    	      //FileSaver fs2 = new FileSaver(channels.get(1));
+			    	      //fname = "\\imgRight_"+measurementTag+String.format("_%05d", frame)+".tiff";
+			    	      //fs2.saveAsTiff(path+"\\"+measurementTag+"\\RightChannel"+measurementTag+fname);
+			    	      stackLeft.addSlice(channels.get(0).getProcessor());
+			    	      stackRight.addSlice(channels.get(1).getProcessor());
 		    	      }
 		    	      else if (comboBoxWhichPart.getSelectedIndex() == 1){
-		    	    	  FileSaver fs = new FileSaver(channels.get(0));
-		    	    	  fname = "\\imgLeft_"+measurementTag+String.format("_%05d", frame)+".tiff";
-			    	      fs.saveAsTiff(path+"\\"+measurementTag+"\\LeftChannel"+fname);
+		    	    	  //FileSaver fs = new FileSaver(channels.get(0));
+		    	    	  //fname = "\\imgLeft_"+measurementTag+String.format("_%05d", frame)+".tiff";
+			    	      //fs.saveAsTiff(path+"\\"+measurementTag+"\\LeftChannel"+measurementTag+fname);
+			    	      //ipLC.setPixels(leftShort);
+			    	      stackLeft.addSlice(channels.get(0).getProcessor());
 		    	      }
 		    	      else {
-		    	    	  FileSaver fs = new FileSaver(channels.get(1));
-		    	    	  fname = "\\imgRight_"+measurementTag+String.format("_%05d", frame)+".tiff";
-			    	      fs.saveAsTiff(path+"\\"+measurementTag+"\\RightChannel"+fname);
+		    	    	  //FileSaver fs = new FileSaver(channels.get(1));
+		    	    	  //fname = "\\imgRight_"+measurementTag+String.format("_%05d", frame)+".tiff";
+			    	      //fs.saveAsTiff(path+"\\"+measurementTag+"\\RightChannel"+measurementTag+fname);
+			    	      //ipRC.setPixels(rightShort);
+			    	      stackRight.addSlice(channels.get(1).getProcessor());
 		    	      }
 		    	      /*try {
 							outputStream.println(frame+ " "+ arduinoControl.getAnalogInput());
@@ -279,15 +323,47 @@ public class CameraControl extends JPanel {
 		    	      imgDisp.updateImage(imp);
 		    	      frame++;
 		    	   }
+		    	   else {
+		    		   Thread.sleep(100);
+		    	   }
 		    	}
 		    	outputStream.close();
+			
+	    	
+	    	
+		    	if (comboBoxWhichPart.getSelectedIndex() == 0){
+					ImagePlus leftStack = new ImagePlus("", stackLeft);
+					ImagePlus rightStack = new ImagePlus("", stackRight);
+					FileSaver fs = new FileSaver(leftStack);
+					fs.saveAsTiffStack(path+"\\"+measurementTag+"\\LeftChannel"+measurementTag+".tif");
+					FileSaver fs2 = new FileSaver(rightStack);
+					fs2.saveAsTiffStack(path+"\\"+measurementTag+"\\RigthChannel"+measurementTag+".tif");
+		    		
+		    	}
+	  	        else if (comboBoxWhichPart.getSelectedIndex() == 1){
+	  	        	ImagePlus leftStack = new ImagePlus("", stackLeft);
+	    			FileSaver fs = new FileSaver(leftStack);
+	    			fs.saveAsTiffStack(path+"\\"+measurementTag+"\\LeftChannel"+measurementTag+".tif");
+	  	    	}
+	  	        else {
+	  	        	
+	    			ImagePlus rightStack = new ImagePlus("", stackRight);
+	    			FileSaver fs2 = new FileSaver(rightStack);
+	    			fs2.saveAsTiffStack(path+"\\"+measurementTag+"\\RightChannel"+measurementTag+".tif");
+  	    	}
+	    	
+	    	
+	    	} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    	btnStartAcquisition.setEnabled(true);
+	    	try {
+				core.stopSequenceAcquisition();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-	    
-	    	btnStartAcquisition.setEnabled(true);
-	    	
 
 	    }	
 	}
@@ -725,7 +801,8 @@ public class CameraControl extends JPanel {
 	ActionListener btnAbortAcquisitionActionListener =new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			try {
-				core.stopSequenceAcquisition();
+				aquisitionShouldContinue = false;
+				//core.stopSequenceAcquisition();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -831,17 +908,22 @@ public class CameraControl extends JPanel {
 	    	    String measurementTag = txtMeasurementTag.getText();
 	    	    String path = txtSavePath.getText();
 	    	    boolean success = (new File(path+"\\"+measurementTag)).mkdirs();
-	    	    String fname = "\\widefieldimg_"+measurementTag+".tiff";
+	    	    String fname = "\\widefieldimg_1_"+measurementTag+".tiff";
 	    	    File f = new File(path+"\\"+measurementTag+fname);
-	    	    if(f.exists()) {
-	    	    	System.out.println("File already exists!");
-	    	    	//JDialog d = new JDialog(, "File already exists!");
-	    	    	fs.saveAsTiff(path+"\\"+measurementTag+fname+"_2.tiff");
-	    	    }
-	    	    else{
-	    	    	fs.saveAsTiff(path+"\\"+measurementTag+fname);
-	    	    }
-				
+	    	  
+	    		int counter = 1;
+	    		while(1==1){
+	    			counter = counter + 1;
+	    			File f3 = new File(path+"\\"+measurementTag+"\\widefieldimg_"+counter+"_"+measurementTag+".tiff");
+	    			if (f3.exists()){
+	    				
+	    			}
+	    			else{
+	    				fs.saveAsTiff(path+"\\"+measurementTag+"\\widefieldimg_"+counter+"_"+measurementTag+".tiff");
+	    				break;
+	    			}
+	    		}
+	    	   
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

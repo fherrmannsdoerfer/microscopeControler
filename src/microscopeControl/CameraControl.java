@@ -3,17 +3,13 @@ package microscopeControl;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.io.FileSaver;
-import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-import ij.process.ShortProcessor;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
@@ -25,57 +21,37 @@ import java.awt.Dimension;
 
 import javax.swing.SwingConstants;
 
-import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.BorderLayout;
 import java.awt.Rectangle;
 
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.BoxLayout;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.micromanager.acquisition.AcquisitionData;
 import org.micromanager.acquisition.AcquisitionEngine;
-import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
 //import org.micromanager.api.AcquisitionEngine;
 import org.micromanager.utils.ImageUtils;
 
 import mmcorej.CMMCore;
 
-import java.awt.GridLayout;
-import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import javax.swing.JSlider;
 import javax.swing.JComboBox;
 import javax.swing.JTabbedPane;
 
 public class CameraControl extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JTextField txtGain;
 	private JTextField txtEmGain;
 	private JTextField txtExposureTime;
@@ -107,12 +83,23 @@ public class CameraControl extends JPanel {
 	MainFrame parent;
 	boolean livePreviewRunning;
 	JComboBox comboBoxShutter;
+	JComboBox fitMethodSelectionChkBox;
 	Rectangle rect;
 	ImageDisplay imgDisp;
 	ArduinoControl arduinoControl;
 	JComboBox comboBoxWhichPart;
+	JCheckBox do3DchkBox;
+	JButton recalculateEverythingButton;
+	JCheckBox doReconstructionChkBox;
 	boolean threadShouldStayRunning = true;
 	boolean aquisitionShouldContinue = true;
+	
+	ExecutorService executor = Executors.newFixedThreadPool(7);
+	ReconControll rc = new ReconControll();
+	Runnable t = new Thread(rc);
+	//
+	
+	
 	
 	class TimeLoop implements Runnable {
 		public TimeLoop(){}
@@ -131,8 +118,7 @@ public class CameraControl extends JPanel {
 					else {lblStatus.setText("Stand by");parent.setCameraStatus("Stand by");}
 					Thread.sleep(1000);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					//e.printStackTrace();
+					e.printStackTrace();
 				}
 				
 			}
@@ -170,13 +156,14 @@ public class CameraControl extends JPanel {
 					//System.out.println("Exposure: "+core.getProperty(core.getCameraDevice(), "Exposure"));
 					core.snapImage();
 					img = core.getImage();
+					//ImageProcessor ipr = ImageUtils.makeProcessor(core,img);
+				    //ImagePlus imp = new ImagePlus("",ipr);
 					ImagePlus imp = normalizeMeasurement(img, gain);
 					parent.setCurrentImage(imp);
 					if (counter % 20 == 0){
 						firePSFRateCountRequiredEvent(new PSFRateCountRequiredEvent(this, imp));
 					}
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
@@ -196,9 +183,6 @@ public class CameraControl extends JPanel {
 		}
 		@Override
 		public void run() {
-			Object img;
-			double exp;
-			int gain;
 			while (livePreviewRunning && threadShouldStayRunning){
 				try {
 		    	    ImagePlus imp = new ImagePlus("C:\\Users\\herrmannsdoerfer\\Documents\\Projects\\LaborTagebuch\\Dateien\\2014_06\\halbSchwarz.tif");
@@ -224,6 +208,12 @@ public class CameraControl extends JPanel {
 		int gain;
 		String path;
 		String measurementTag;
+		boolean useFirstVariableSet = true; // Variable which determines which set of variables is used for storage of the current stack (the other variables are saved)
+		ImageStack stackLeft;
+        ImageStack stackRight;
+        ImageStack stackLeft2;
+        ImageStack stackRight2;
+        int stackCounter;
 		public MessageLoop(double exposure, int nbrFrames, int gain, String path, String measurementTag) {
 			this.exposure = exposure;
 			this.nbrFrames = nbrFrames;
@@ -232,33 +222,31 @@ public class CameraControl extends JPanel {
 			this.measurementTag = measurementTag;
 		}
 		public void run() {
-			
 	    	Object img;
 	    	try {
 	    		
-	    		boolean success = (new File(path+"\\"+measurementTag)).mkdirs();
-	    		boolean success2 = (new File(path+"\\"+measurementTag+"\\LeftChannel"+measurementTag)).mkdirs();
-	    		boolean success3 = (new File(path+"\\"+measurementTag+"\\RightChannel"+measurementTag)).mkdirs();
+	    		(new File(path+"\\"+measurementTag)).mkdirs();
+	    		(new File(path+"\\"+measurementTag+"\\LeftChannel"+measurementTag)).mkdirs();
+	    		(new File(path+"\\"+measurementTag+"\\RightChannel"+measurementTag)).mkdirs();
+	    		(new File(path+"\\"+measurementTag+"\\LeftChannel")).mkdirs();
+	    		(new File(path+"\\"+measurementTag+"\\RightChannel")).mkdirs();
 	    		PrintWriter outputStream = new PrintWriter(new FileWriter(path+"\\"+measurementTag+"\\log_ArduinoVoltage"+measurementTag+".txt"));
 				outputStream.println("Automatically generated log file for Arduino Analog Input");
-				core.setCircularBufferMemoryFootprint(4000);
+				core.setCircularBufferMemoryFootprint(2000);
 				//core.prepareSequenceAcquisition(core.getCameraDevice());
 				//System.out.println("prepared");
 		    	//System.out.println(exposure);
 		    	core.setProperty(core.getCameraDevice(),"Exposure", exposure);
-		    	core.startSequenceAcquisition(nbrFrames+1000, exposure, false);
+		    	core.startSequenceAcquisition(nbrFrames+5000, exposure, false);
 		    	aquisitionShouldContinue = true;
 		    	int frame = 0;
-		    	//System.out.println(frame);
-		    	ImageProcessor ipr;
-		    	String fname;
 		    	lblStatus.setText("Acquisition");
 		    	parent.setAction("Acquisition");
 	    		lblTotalFrames.setText(" / "+String.valueOf(nbrFrames));
 	    		createLogFile(measurementTag, gain, exposure, path, nbrFrames);
 	    		
 
-	            long byteDepth = core.getBytesPerPixel();
+	            core.getBytesPerPixel();
 	            int imgWidth, imgHeight;
 	            
 	            if (chckbxApplyRect.isSelected()) {
@@ -271,10 +259,16 @@ public class CameraControl extends JPanel {
 	            }
 	           
 	       
-	            ImageStack stackLeft = new ImageStack(imgWidth, imgHeight);
-	            ImageStack stackRight = new ImageStack(imgWidth, imgHeight);
+	            stackLeft = new ImageStack(imgWidth, imgHeight);
+	            stackRight = new ImageStack(imgWidth, imgHeight);
+	            stackLeft2 = new ImageStack(imgWidth, imgHeight);
+	            stackRight2 = new ImageStack(imgWidth, imgHeight);
+	            double bytesPerFrame = imgWidth * imgHeight * 2; // 16 bit images
+	            int maxImagesPerStack = (((int) Math.floor(3.e9 / bytesPerFrame))/1000) * 1000; // max 3. GB per Stack
+	            int imagesInCurrentStack = 0;
+	            stackCounter = 0;
 	            
-		    	double now = System.currentTimeMillis();
+		    	System.currentTimeMillis();
 		    	while (frame<nbrFrames && aquisitionShouldContinue){//core.getRemainingImageCount() > 0 || core.isSequenceRunning(core.getCameraDevice())) {//for whatever reason a few frames are always missing, so the loop will not exit...
 		    	   if (core.getRemainingImageCount() > 0) {
 		    		  //System.out.println("Remaining image count: "+core.getRemainingImageCount());
@@ -282,6 +276,8 @@ public class CameraControl extends JPanel {
 		    		  parent.setFrameCount(String.valueOf(frame+1)+" / "+String.valueOf(nbrFrames));
 		    		  //System.out.println(frame);
 		    	      img = core.popNextImage();
+		    	      //ImageProcessor ipr2 = ImageUtils.makeProcessor(core,img);
+					  //ImagePlus imp = new ImagePlus("",ipr2);
 		    	      ImagePlus imp = normalizeMeasurement(img, gain);
 		    	      ArrayList<ImagePlus> channels = cropImages(imp.getProcessor(), chckbxApplyRect.isSelected());
 		    	      
@@ -297,23 +293,41 @@ public class CameraControl extends JPanel {
 			    	      //FileSaver fs2 = new FileSaver(channels.get(1));
 			    	      //fname = "\\imgRight_"+measurementTag+String.format("_%05d", frame)+".tiff";
 			    	      //fs2.saveAsTiff(path+"\\"+measurementTag+"\\RightChannel"+measurementTag+fname);
-			    	      stackLeft.addSlice(channels.get(0).getProcessor());
-			    	      stackRight.addSlice(channels.get(1).getProcessor());
+		    	    	  if (useFirstVariableSet){
+		    	    		  stackLeft.addSlice(channels.get(0).getProcessor());
+				    	      stackRight.addSlice(channels.get(1).getProcessor());
+		    	    	  }
+		    	    	  else {
+		    	    		  stackLeft2.addSlice(channels.get(0).getProcessor());
+				    	      stackRight2.addSlice(channels.get(1).getProcessor());
+		    	    	  }
+			    	      
 		    	      }
 		    	      else if (comboBoxWhichPart.getSelectedIndex() == 1){
 		    	    	  //FileSaver fs = new FileSaver(channels.get(0));
 		    	    	  //fname = "\\imgLeft_"+measurementTag+String.format("_%05d", frame)+".tiff";
 			    	      //fs.saveAsTiff(path+"\\"+measurementTag+"\\LeftChannel"+measurementTag+fname);
 			    	      //ipLC.setPixels(leftShort);
-			    	      stackLeft.addSlice(channels.get(0).getProcessor());
+			    	      if (useFirstVariableSet){
+		    	    		  stackLeft.addSlice(channels.get(0).getProcessor());
+		    	    	  }
+		    	    	  else {
+		    	    		  stackLeft2.addSlice(channels.get(0).getProcessor());
+		    	    	  }
 		    	      }
 		    	      else {
 		    	    	  //FileSaver fs = new FileSaver(channels.get(1));
 		    	    	  //fname = "\\imgRight_"+measurementTag+String.format("_%05d", frame)+".tiff";
 			    	      //fs.saveAsTiff(path+"\\"+measurementTag+"\\RightChannel"+measurementTag+fname);
 			    	      //ipRC.setPixels(rightShort);
-			    	      stackRight.addSlice(channels.get(1).getProcessor());
+		    	    	  if (useFirstVariableSet){
+		    	    		  stackLeft.addSlice(channels.get(1).getProcessor());
+		    	    	  }
+		    	    	  else {
+		    	    		  stackLeft2.addSlice(channels.get(1).getProcessor());
+		    	    	  }
 		    	      }
+		    	      imagesInCurrentStack += 1;
 		    	      /*try {
 							outputStream.println(frame+ " "+ arduinoControl.getAnalogInput());
 					  } catch (Exception e) {
@@ -326,31 +340,68 @@ public class CameraControl extends JPanel {
 		    	   else {
 		    		   Thread.sleep(100);
 		    	   }
+		    	  // System.out.println(imagesInCurrentStack+" "+maxImagesPerStack);
+		    	   if (imagesInCurrentStack == maxImagesPerStack){
+		    		   imagesInCurrentStack = 0;
+		    		   stackCounter+=1;
+		    		   if (useFirstVariableSet){
+		    			   stackLeft2 = new ImageStack(imgWidth, imgHeight);
+		    			   stackRight2 = new ImageStack(imgWidth, imgHeight);
+		    			   Thread saveStackThread = new Thread(new Runnable(){
+		    				   @Override
+		    				   public void run(){
+		    					   writeStacks(comboBoxWhichPart.getSelectedIndex(), stackCounter, measurementTag,stackLeft,stackRight,
+		    							   doReconstructionChkBox.isSelected()); 
+		    				   }
+		    			   });
+		    			   saveStackThread.start();
+		    			   //writeStacks(comboBoxWhichPart.getSelectedIndex(), stackCounter, measurementTag,stackLeft,stackRight);
+		    		   }
+		    		   else{
+		    			   stackLeft = new ImageStack(imgWidth, imgHeight);
+		    			   stackRight = new ImageStack(imgWidth, imgHeight);
+		    			   Thread saveStackThread = new Thread(new Runnable(){
+		    				   @Override
+		    				   public void run(){
+		    					   writeStacks(comboBoxWhichPart.getSelectedIndex(), stackCounter, measurementTag,stackLeft2,stackRight2,
+		    							   doReconstructionChkBox.isSelected()); 
+		    				   }
+		    			   });
+		    			   saveStackThread.start();
+		    			   //writeStacks(comboBoxWhichPart.getSelectedIndex(), stackCounter, measurementTag,stackLeft2,stackRight2);
+		    		   }
+		    		   useFirstVariableSet = !useFirstVariableSet;
+		    	   }
 		    	}
 		    	outputStream.close();
-			
-	    	
-	    	
-		    	if (comboBoxWhichPart.getSelectedIndex() == 0){
-					ImagePlus leftStack = new ImagePlus("", stackLeft);
-					ImagePlus rightStack = new ImagePlus("", stackRight);
-					FileSaver fs = new FileSaver(leftStack);
-					fs.saveAsTiffStack(path+"\\"+measurementTag+"\\LeftChannel"+measurementTag+".tif");
-					FileSaver fs2 = new FileSaver(rightStack);
-					fs2.saveAsTiffStack(path+"\\"+measurementTag+"\\RigthChannel"+measurementTag+".tif");
+		    	try{
+		    		stackCounter+=1;
+			    	if (useFirstVariableSet){
+			    		Thread saveStackThread = new Thread(new Runnable(){
+		    				   @Override
+		    				   public void run(){
+		    					   writeStacks(comboBoxWhichPart.getSelectedIndex(), stackCounter, measurementTag,stackLeft,stackRight,
+		    							   doReconstructionChkBox.isSelected()); 
+		    				   }
+		    			 });
+			    		saveStackThread.start();
+	    			   //writeStacks(comboBoxWhichPart.getSelectedIndex(), stackCounter, measurementTag,stackLeft,stackRight);
+	    		   }
+	    		   else{
+	    			   Thread saveStackThread = new Thread(new Runnable(){
+	    				   @Override
+	    				   public void run(){
+	    					   writeStacks(comboBoxWhichPart.getSelectedIndex(), stackCounter, measurementTag,stackLeft2,stackRight2,
+	    							   doReconstructionChkBox.isSelected());
+	    				   }
+	    			   });
+	    			   saveStackThread.start();
+	    			   //writeStacks(comboBoxWhichPart.getSelectedIndex(), stackCounter, measurementTag,stackLeft2,stackRight2);
+	    		   }
+		    	}
+		    	catch(Exception e){
 		    		
 		    	}
-	  	        else if (comboBoxWhichPart.getSelectedIndex() == 1){
-	  	        	ImagePlus leftStack = new ImagePlus("", stackLeft);
-	    			FileSaver fs = new FileSaver(leftStack);
-	    			fs.saveAsTiffStack(path+"\\"+measurementTag+"\\LeftChannel"+measurementTag+".tif");
-	  	    	}
-	  	        else {
-	  	        	
-	    			ImagePlus rightStack = new ImagePlus("", stackRight);
-	    			FileSaver fs2 = new FileSaver(rightStack);
-	    			fs2.saveAsTiffStack(path+"\\"+measurementTag+"\\RightChannel"+measurementTag+".tif");
-  	    	}
 	    	
 	    	
 	    	} catch (Exception e) {
@@ -365,7 +416,49 @@ public class CameraControl extends JPanel {
 				e.printStackTrace();
 			}
 
-	    }	
+	    }
+		private void writeStacks(int selectedIndex, int stackCounter,
+				String measurementTag, ImageStack stackLeft, ImageStack stackRight, 
+				boolean doSimultaneousReconstruction) {
+			if (selectedIndex == 0){
+				ImagePlus leftStack = new ImagePlus("", stackLeft);
+				ImagePlus rightStack = new ImagePlus("", stackRight);
+				FileSaver fs = new FileSaver(leftStack);
+				String basename1 = "LeftChannel"+measurementTag+"pt"+String.format("%03d", stackCounter);
+				String pathTiffFile1 = path+"\\"+measurementTag+"\\LeftChannel\\"+basename1+".tif";
+				fs.saveAsTiffStack(pathTiffFile1);
+				FileSaver fs2 = new FileSaver(rightStack);
+				String basename2 = "RightChannel"+measurementTag+"pt"+String.format("%03d", stackCounter);
+				String pathTiffFile2 = path+"\\"+measurementTag+"\\RightChannel\\"+basename2+".tif";
+				fs2.saveAsTiffStack(pathTiffFile2);
+	    		if (doSimultaneousReconstruction){
+	    			startPython(pathTiffFile1, basename1);
+	    			startPython(pathTiffFile2, basename2);
+	    		}
+	    	}
+  	        else if (selectedIndex == 1){
+  	        	ImagePlus leftStack = new ImagePlus("", stackLeft);
+  	        	FileSaver fs = new FileSaver(leftStack);
+				String basename1 = "LeftChannel"+measurementTag+"pt"+String.format("%03d", stackCounter);
+				String pathTiffFile1 = path+"\\"+measurementTag+"\\LeftChannel\\"+basename1+".tif";
+				fs.saveAsTiffStack(pathTiffFile1);
+    			fs.saveAsTiffStack(path+"\\"+measurementTag+"\\LeftChannel"+measurementTag+".tif");
+    			if (doSimultaneousReconstruction){
+	    			startPython(pathTiffFile1, basename1);
+	    		}
+  	    	}
+  	        else {
+    			ImagePlus rightStack = new ImagePlus("", stackRight);
+    			FileSaver fs2 = new FileSaver(rightStack);
+    			String basename2 = "RightChannel"+measurementTag+"pt"+String.format("%03d", stackCounter);
+				String pathTiffFile2 = path+"\\"+measurementTag+"\\RightChannel\\"+basename2+".tif";
+				fs2.saveAsTiffStack(pathTiffFile2);
+    			if (doSimultaneousReconstruction){
+	    			startPython(pathTiffFile2, basename2);
+	    		}
+  	        }
+		}
+		
 	}
 
 	ArrayList<ImagePlus> cropImages(ImageProcessor imp, boolean applyRect){
@@ -394,6 +487,8 @@ public class CameraControl extends JPanel {
 	 * Create the panel.
 	 */
 	public CameraControl(MainFrame parent_, final CMMCore core_, final AcquisitionEngine acq, String camName_) {
+		executor.execute(t); //start thread that handles reconstruction
+				
 		core = core_;
 		camName = camName_;
 		parent = parent_;
@@ -721,7 +816,7 @@ public class CameraControl extends JPanel {
 		Component horizontalGlue_11 = Box.createHorizontalGlue();
 		horizontalBox_15.add(horizontalGlue_11);
 		
-		Vector items = new Vector();
+		Vector<String> items = new Vector<String>();
 		items.add("Both Channels");
 		items.add("Left Channel Only");
 		items.add("Right Channel Only");
@@ -749,10 +844,125 @@ public class CameraControl extends JPanel {
 		chckbxApplyRect = new JCheckBox("Apply Rectangle");
 		horizontalBox_14.add(chckbxApplyRect);
 		
+		Box verticalBox_4 = Box.createVerticalBox();
+		tabbedPane.addTab("RapidSTORM", null, verticalBox_4, null);
+		
+		Box horizontalBox_16 = Box.createHorizontalBox();
+		verticalBox_4.add(horizontalBox_16);
+		
+		doReconstructionChkBox = new JCheckBox("Do simultaneous processing");
+		doReconstructionChkBox.setSelected(true);
+		horizontalBox_16.add(doReconstructionChkBox);
+		
+		Component horizontalGlue_16 = Box.createHorizontalGlue();
+		horizontalBox_16.add(horizontalGlue_16);
+		
+		do3DchkBox = new JCheckBox("3D data");
+		do3DchkBox.setSelected(true);
+		horizontalBox_16.add(do3DchkBox);
+		
+		Component verticalGlue_9 = Box.createVerticalGlue();
+		verticalBox_4.add(verticalGlue_9);
+		
+		Box horizontalBox_17 = Box.createHorizontalBox();
+		verticalBox_4.add(horizontalBox_17);
+		
+		JLabel lblNewLabel_13 = new JLabel("Calibration File");
+		horizontalBox_17.add(lblNewLabel_13);
+		
+		Component horizontalGlue_18 = Box.createHorizontalGlue();
+		horizontalBox_17.add(horizontalGlue_18);
+		
+		calibrationFileText = new JTextField();
+		calibrationFileText.setText("D:\\MessungenTemp\\Calibration141107KalibrationSchalenLinseAligned_cropped-sigma-table.txt");
+		calibrationFileText.setMinimumSize(new Dimension(200, 20));
+		calibrationFileText.setPreferredSize(new Dimension(200, 20));
+		calibrationFileText.setMaximumSize(new Dimension(200, 20));
+		horizontalBox_17.add(calibrationFileText);
+		calibrationFileText.setColumns(100);
+		
+		Component verticalGlue_10 = Box.createVerticalGlue();
+		verticalBox_4.add(verticalGlue_10);
+		
+		Box horizontalBox_18 = Box.createHorizontalBox();
+		verticalBox_4.add(horizontalBox_18);
+		
+		JLabel lblNewLabel_14 = new JLabel("Threshold");
+		horizontalBox_18.add(lblNewLabel_14);
+		
+		Component horizontalGlue_17 = Box.createHorizontalGlue();
+		horizontalBox_18.add(horizontalGlue_17);
+		
+		fitMethodSelectionChkBox = new JComboBox();
+		fitMethodSelectionChkBox.addItem("Local Relative Threshold");
+		fitMethodSelectionChkBox.addItem("Absolute Threshold");
+		
+		horizontalBox_18.add(fitMethodSelectionChkBox);
+		
+		thresholdText = new JTextField();
+		thresholdText.setText("30");
+		thresholdText.setMaximumSize(new Dimension(50, 20));
+		horizontalBox_18.add(thresholdText);
+		thresholdText.setColumns(10);
+		
+		Component verticalGlue_11 = Box.createVerticalGlue();
+		verticalBox_4.add(verticalGlue_11);
+		
+		Box horizontalBox_19 = Box.createHorizontalBox();
+		verticalBox_4.add(horizontalBox_19);
+		
+		recalculateEverythingButton = new JButton("Recalculate everything");
+		recalculateEverythingButton.addActionListener(recalculateEverythingButtonActionListener);
+		horizontalBox_19.add(recalculateEverythingButton);
+		
 		Thread timeLoopThread = new Thread(new TimeLoop());
 		timeLoopThread.start();
 		
 	}
+		
+	ActionListener recalculateEverythingButtonActionListener = new ActionListener(){
+		public void actionPerformed(ActionEvent e) {
+			String path = txtSavePath.getText();
+			String measurementTag = txtMeasurementTag.getText();
+			File dir = new File(path+"\\"+measurementTag+"\\RightChannel\\");
+	    	File[] files = dir.listFiles(new FilenameFilter() { 
+	    	         public boolean accept(File dir, String filename)
+	    	              { return filename.endsWith(".tif"); }
+	    	} );
+	    	if (comboBoxWhichPart.getSelectedIndex() == 0||(comboBoxWhichPart.getSelectedIndex() == 1)){
+		    	for (int i=0;i<files.length;i++){
+		    		System.out.println(files[i].toString());
+		    		String fname = files[i].getName();
+		    		String[] parts = fname.split("\\.");
+		    		String basename = parts[0];
+		    		startPython(files[i].toString(),basename);
+		    	}
+		    }
+	    	if (comboBoxWhichPart.getSelectedIndex() == 0||(comboBoxWhichPart.getSelectedIndex() == 2)){
+		    	for (int i=0;i<files.length;i++){
+		    		System.out.println(files[i].toString());
+		    		String fname = files[i].getName();
+		    		String[] parts = fname.split("\\.");
+		    		String basename = parts[0];
+		    		startPython(files[i].toString(),basename);
+		    	}
+		    }
+	    	dir = new File(path+"\\"+measurementTag+"\\LeftChannel\\");
+	    	files = dir.listFiles(new FilenameFilter() { 
+	    	         public boolean accept(File dir, String filename)
+	    	              { return filename.endsWith(".tif"); }
+	    	} );
+	    	for (int i=0;i<files.length;i++){
+	    		System.out.println(files[i].toString());
+	    		String fname = files[i].getName();
+	    		String[] parts = fname.split("\\.");
+	    		String basename = parts[0];
+	    		startPython(files[i].toString(),basename);
+	    	}
+	    	
+		}
+	};
+	
 	ActionListener btnLoadSavePathActionListener =new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			//System.out.println("hisafs;djf;sadfj;");
@@ -843,6 +1053,7 @@ public class CameraControl extends JPanel {
 	ActionListener btnStartLivePreviewActionListener =new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			try {
+				core.setProperty(core.getCameraDevice(),"Exposure", Double.parseDouble(txtExposureTime.getText()));
 				livePreviewThread = new Thread(new LivePreview());
 				//livePreviewThread = new Thread(new LivePreviewWithoutCamera());
 				livePreviewThread.start();
@@ -907,12 +1118,12 @@ public class CameraControl extends JPanel {
 	    	    FileSaver fs = new FileSaver(imp);
 	    	    String measurementTag = txtMeasurementTag.getText();
 	    	    String path = txtSavePath.getText();
-	    	    boolean success = (new File(path+"\\"+measurementTag)).mkdirs();
+	    	    (new File(path+"\\"+measurementTag)).mkdirs();
 	    	    String fname = "\\widefieldimg_1_"+measurementTag+".tiff";
-	    	    File f = new File(path+"\\"+measurementTag+fname);
+	    	    new File(path+"\\"+measurementTag+fname);
 	    	  
 	    		int counter = 1;
-	    		while(1==1){
+	    		while(true){
 	    			counter = counter + 1;
 	    			File f3 = new File(path+"\\"+measurementTag+"\\widefieldimg_"+counter+"_"+measurementTag+".tiff");
 	    			if (f3.exists()){
@@ -930,6 +1141,8 @@ public class CameraControl extends JPanel {
 			}
 		}
 	};
+	private JTextField calibrationFileText;
+	private JTextField thresholdText;
 	
 	
 	void createLogFile(String measurementTag, int gain, double exposure, String path, int nbrFrames) {
@@ -1033,4 +1246,117 @@ public class CameraControl extends JPanel {
 	    ImagePlus imp = new ImagePlus("",ipr);
 	    return imp;
 	}
+	
+	public void startPython(String pathTiffFile, String basename) {
+		PrintWriter outputStream;
+		String path = txtSavePath.getText();
+		String measurementTag = txtMeasurementTag.getText();
+		try {
+			(new File(path+"\\"+measurementTag+"\\Auswertung\\RapidStorm\\PythonSkripts")).mkdirs();
+			String outputBasename = path+"\\"+measurementTag+"\\Auswertung\\RapidStorm\\"+basename;
+			outputBasename = outputBasename.replace("\\", "/");
+			pathTiffFile = pathTiffFile.replace("\\", "/");
+			String calibrationFile = calibrationFileText.getText();
+			String threshold = thresholdText.getText();
+			boolean use3D = do3DchkBox.isSelected();
+			calibrationFile = calibrationFile.replace("\\", "/");
+			String fitMethode = "";
+			if (fitMethodSelectionChkBox.getSelectedItem().toString().equals("Local Relative Threshold")){
+				fitMethode = "--FitJudgingMethod SquareRootRatio --SNR "+ threshold;
+			}
+			else{
+				fitMethode = "--AmplitudeThreshold "+ threshold;
+			}
+			String image = "";
+			String pixelsize = "";
+			if (use3D){
+				image = "--ChooseTransmission Image --ColourScheme ByCoordinate --HueCoordinate PositionZ";
+				pixelsize = " --PixelSizeInNM 133,123 ";
+			}
+			else{
+				image = "--ChooseTransmission Image --ColourScheme Grayscale";
+				pixelsize = " --PixelSizeInNM 133,133 ";
+			}
+			
+			outputStream = new PrintWriter(new FileWriter(path+"\\"+measurementTag+"\\Auswertung\\RapidStorm\\PythonSkripts\\"+basename+".py"));
+			outputStream.println("import os");
+			outputStream.println("os.system(\"\\\"C:/Program Files/rapidstorm3/bin/rapidSTORM.exe\\\" --inputFile "+pathTiffFile+" --Basename "+outputBasename+pixelsize+image+" --chooseTransmission Table "+fitMethode+" --ThreeD Spline3D --ZCalibration "+calibrationFile+ " --AutoTerminate --run\")");
+			outputStream.close();
+			//Runtime rt = Runtime.getRuntime();
+			rc.addFile(path+"\\"+measurementTag+"\\Auswertung\\RapidStorm\\PythonSkripts\\"+basename+".py");
+//			System.out.println("python "+path+"\\"+measurementTag+"\\Auswertung\\RapidStorm\\PythonSkripts\\"+basename+".py");
+//			Process proc = new ProcessBuilder().command("python "+path+"\\"+measurementTag+"\\Auswertung\\RapidStorm\\PythonSkripts\\"+basename+".py").start();
+//			Process proc = rt.exec("python "+path+"\\"+measurementTag+"\\Auswertung\\RapidStorm\\PythonSkripts\\"+basename+".py");
+			//proc.w
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}	
+}
+
+class ReconControll implements Runnable{
+	ArrayList<String> fileList = new ArrayList<String>();
+	boolean isAvailable = true;
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		while (true){
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			if (isAvailable && fileList.size()>0){
+				String toProcess = fileList.get(0);
+				fileList.remove(0);
+				try {
+					isAvailable = false;
+					System.out.println(toProcess);
+					RunRapidSTORM rrs = new RunRapidSTORM(toProcess);
+					Runtime rt = Runtime.getRuntime();
+					System.out.println("python.exe D:/MessungenTemp/150624COSActinAlexa647CytoskeletonbufferMeasurement3/Auswertung/RapidStorm/PythonSkripts/LeftChannel150624COSActinAlexa647CytoskeletonbufferMeasurement3pt1.py");
+					System.out.println("python.exe "+toProcess.replace("\\", "/"));
+					String pythonPath = "c:\\Program Files\\Anaconda\\python.exe";
+					//Process proc = rt.exec("python.exe "+toProcess.replace("\\", "/"));
+					//Process proc2 = new ProcessBuilder().command("C:/Program Files/Anaconda/python.exe").start();
+					Process proc = new ProcessBuilder().command(pythonPath,toProcess.replace("\\", "/")).start();
+					try {
+						Thread.sleep(1000);
+						proc.waitFor();
+						isAvailable = true;
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						isAvailable = true;
+					}
+					isAvailable = true;
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					isAvailable = true;
+				}
+				
+			}
+		}
+	}
+	public void addFile(String file){
+		fileList.add(file);
+	}
+	
+}
+
+class RunRapidSTORM implements Runnable{
+	String filename;
+	RunRapidSTORM(String filename){
+		this.filename = filename;
+	}
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }

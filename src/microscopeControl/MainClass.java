@@ -32,9 +32,9 @@ public class MainClass implements org.micromanager.api.MMPlugin{
       gui_ = (MMStudioMainFrame) app;
       core_ = app.getMMCore();
       acq_ = gui_.getAcquisitionEngine();
-      JFrame meinFrame = new MainFrame(core_, gui_, acq_);
+      JFrame mainFrame = new MainFrame(core_, gui_, acq_);
 
-      meinFrame.setVisible(true);
+      mainFrame.setVisible(true);
    }
    
    @Override

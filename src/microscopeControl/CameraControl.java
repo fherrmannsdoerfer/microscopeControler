@@ -11,6 +11,7 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import java.awt.Component;
@@ -538,7 +539,7 @@ public class CameraControl extends JPanel {
 		horizontalBox_10.add(horizontalGlue_10);
 		
 		txtMeasurementTag = new JTextField();
-		txtMeasurementTag.setText("test");
+		txtMeasurementTag.setText("test2");
 		txtMeasurementTag.setMaximumSize(new Dimension(200, 50));
 		txtMeasurementTag.setColumns(40);
 		txtMeasurementTag.setMinimumSize(new Dimension(6, 10));
@@ -568,7 +569,7 @@ public class CameraControl extends JPanel {
 		Box horizontalBox = Box.createHorizontalBox();
 		verticalBox.add(horizontalBox);
 		
-		btnStartAcquisition = new JButton("Start Acquisition");
+		JButton btnStartAcquisition = new JButton("Start Acquisition");
 		btnStartAcquisition.addActionListener(btnStartAcquisitionActionListener);
 		horizontalBox.add(btnStartAcquisition);
 		
@@ -976,35 +977,40 @@ public class CameraControl extends JPanel {
 	};
 	ActionListener btnStartAcquisitionActionListener =new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
-			livePreviewRunning = false;
-			try {
-				if (chkboxFrameTransfer.isSelected()) {
-					core.setProperty(camName, "FrameTransfer", "On");
+			if (checkSettings()){
+				livePreviewRunning = false;
+				try {
+					if (chkboxFrameTransfer.isSelected()) {
+						core.setProperty(camName, "FrameTransfer", "On");
+					}
+					else {
+						core.setProperty(camName, "FrameTransfer", "Off");
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				else {
-					core.setProperty(camName, "FrameTransfer", "Off");
+				try {
+					//System.out.println(txtEmGain.getText());
+					//System.out.println(Integer.parseInt(txtEmGain.getText()));
+					core.setProperty(camName,"Gain",Integer.parseInt(txtEmGain.getText()));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
+				double exp = Double.parseDouble(txtExposureTime.getText());
+				int nbr = Integer.parseInt(txtNumberFrames.getText());
+				int gain = Integer.parseInt(txtEmGain.getText());
+				String path = txtSavePath.getText();
+				String measurementTag = txtMeasurementTag.getText();
+				acquisitionThread = new Thread(new MessageLoop(exp,nbr,gain,path,measurementTag));
+				acquisitionThread.start();
+				btnStartAcquisition.setEnabled(false);
 			}
-			try {
-				//System.out.println(txtEmGain.getText());
-				//System.out.println(Integer.parseInt(txtEmGain.getText()));
-				core.setProperty(camName,"Gain",Integer.parseInt(txtEmGain.getText()));
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			else{
+				System.out.println("The settings check went wrong!");
 			}
-			
-			double exp = Double.parseDouble(txtExposureTime.getText());
-			int nbr = Integer.parseInt(txtNumberFrames.getText());
-			int gain = Integer.parseInt(txtEmGain.getText());
-			String path = txtSavePath.getText();
-			String measurementTag = txtMeasurementTag.getText();
-			acquisitionThread = new Thread(new MessageLoop(exp,nbr,gain,path,measurementTag));
-			acquisitionThread.start();
-			btnStartAcquisition.setEnabled(false);
 		}
 	};
 
@@ -1160,6 +1166,42 @@ public class CameraControl extends JPanel {
 		}
 	};
 	
+	protected boolean checkSettings() {
+		boolean startMeasurement = true;
+		String path = txtSavePath.getText();
+		String measurementTag = txtMeasurementTag.getText();
+		if ((new File(path+"\\"+measurementTag+"\\LeftChannel")).exists()||(new File(path+"\\"+measurementTag+"\\RightChannel")).exists()){
+			int dialogResult = JOptionPane.showConfirmDialog (null, "The directory where you save your movie does already exist! Do you want to continue?","Warning",JOptionPane.YES_NO_OPTION);
+			if(dialogResult == JOptionPane.YES_OPTION){
+				
+			}
+			else{
+				return false;
+			}
+		}
+		
+		if (Integer.parseInt(txtRectWidth.getText())<256 && Integer.parseInt(txtRectHeight.getText())<512&&!chckbxApplyRect.isSelected()){
+			int dialogResult = JOptionPane.showConfirmDialog (null, "You chose a ROI but did not check apply rectangle! Do you wish to record only the selected ROI?","Warning",JOptionPane.YES_NO_OPTION);
+			if(dialogResult == JOptionPane.YES_OPTION){
+				chckbxApplyRect.setSelected(true);
+			}
+			else{
+				
+			}
+		}
+		if(Integer.parseInt(txtRectWidth.getText())<100 || Integer.parseInt(txtRectHeight.getText())<100){
+			int dialogResult = JOptionPane.showConfirmDialog (null, "The selected ROI is quite small ("+txtRectWidth.getText()+" x "+txtRectHeight.getText()+" pixels)! Do you wish to proceed?","Warning",JOptionPane.YES_NO_OPTION);
+			if(dialogResult == JOptionPane.YES_OPTION){
+				
+			}
+			else{
+				return false;
+			}
+		}
+		
+		
+		return startMeasurement;
+	}
 	String getCurrentOutputFolder(){
 		String measurementTag = txtMeasurementTag.getText();
 	    String path = txtSavePath.getText();

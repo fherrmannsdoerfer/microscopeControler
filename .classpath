@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/Micro-Manager-1.4"/>
+	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/ij.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/AbsoluteLayout.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/bsh-2.0b4.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/clojure.jar"/>
@@ -10,14 +12,17 @@
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/core.memoize.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/data.json.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/gproto.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/gson-2.2.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/jcommon-1.0.16.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/jfreechart-1.0.13.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/loci-common.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/lwm.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/miglayout-4.0-swing.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/MMAcqEngine.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/MMCoreJ.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/MMJ_.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/ome-xml.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/rsyntaxtextarea.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/scifio.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/slf4j-api-1.7.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/substance.jar"/>
@@ -25,8 +30,5 @@
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/swingx-0.9.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/trident.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/TSFProto.jar"/>
-	<classpathentry exported="true" kind="lib" path="C:/Program Files/Micro-Manager-1.4/ij.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/Micro-Manager-1.4/plugins/Micro-Manager/rsyntaxtextarea.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/Micro-Manager-1.4LatestVersion"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -124,14 +124,14 @@ public class LaserPanel extends JPanel {
 		verticalBox.add(btnSwitchLaser);
 
 		try {
-            imgON = ImageIO.read(new File("C:\\Program Files\\Micro-Manager-1.4\\mmplugins\\MicroscopeControl\\src\\org\\micromanager\\MicroscopeControl\\src\\microscopeControl\\on.png"));
-            imgOFF = ImageIO.read(new File("C:\\Program Files\\Micro-Manager-1.4\\mmplugins\\MicroscopeControl\\src\\org\\micromanager\\MicroscopeControl\\src\\microscopeControl\\off.png"));
+            imgON = ImageIO.read(new File("C:\\Program Files\\Micro-Manager-1.4\\plugins\\MicroscopeControl\\src\\resources\\on.png"));
+            imgOFF = ImageIO.read(new File("C:\\Program Files\\Micro-Manager-1.4\\plugins\\MicroscopeControl\\src\\resources\\off.png"));
             btnSwitchLaser.setIcon(new ImageIcon(imgOFF.getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
             btnSwitchLaser.setHorizontalTextPosition(JButton.CENTER);
             btnSwitchLaser.setVerticalTextPosition(JButton.CENTER);
             btnSwitchLaser.setMargin(new Insets(0, 0, 0, 0));
             btnSwitchLaser.setBorder(null);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
         	System.out.println("not found");
         }
 		btnSwitchLaser.addActionListener(btnSwitchLaser_actionListener);
